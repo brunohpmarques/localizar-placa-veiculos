@@ -1,6 +1,7 @@
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Date;
 
 import javax.activation.MimetypesFileTypeMap;
@@ -77,7 +78,9 @@ public class Main {
 		try{
 			
 			System.out.println("Carregando imagens de entrada."); 
-			ArrayList<Imagem> listaImagensEntrada = getListaImagens(DIRECT_ENTRADA, 10);
+			ArrayList<Imagem> listaImagensEntrada = getListaImagens(DIRECT_ENTRADA, 50);
+//			Collections.shuffle(listaImagensEntrada);
+			
 			dateFim = new Date();
 			dateFim.setTime(dateFim.getTime()-dateIni.getTime());
 			System.out.println(listaImagensEntrada.size() +" imagens de entrada carregadas em "+ (dateFim.getTime()/1000) +" segundos.\n");
@@ -89,7 +92,15 @@ public class Main {
 			// PRE-PROCESSAMENTO
 			Imagem imgTemp;
 			for (Imagem imagem : listaImagensEntrada) {
+				imgTemp = pp.paraTonsDeCinza(imagem);
+//				imgTemp = pp.normalizar(imgTemp);
+								
+				imgTemp = pp.filtroGaussiano(imagem, 3, 0);
+//				imgTemp = pp.filtroSobel(imgTemp, PreProcessamento.TODOS);
+//				imgTemp = pp.paraPretoEBrancoLocal(imgTemp, 21, 20);
 				
+				imgTemp = pp.filtroAutoCanny(imgTemp, 0);
+				imgTemp.gravar();
 			}
 			
 			dateFim = new Date();

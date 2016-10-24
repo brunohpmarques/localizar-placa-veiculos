@@ -17,6 +17,13 @@ public class PreProcessamento {
 	public PreProcessamento(String diretorioSaida){
 		this.diretorioSaida = diretorioSaida;
 	}
+	
+	/** Normaliza imagem de entrada **/
+	public Imagem normalizar(Imagem imagem) {
+        Mat saida = new Mat(imagem.getMatriz().height(), imagem.getMatriz().width(), imagem.getMatriz().type());
+        Imgproc.equalizeHist(imagem.getMatriz(), saida);
+		return new Imagem(imagem.getNome() +"_norm", imagem.getFormato(), diretorioSaida, saida);
+	}
 
 	/** Converte imagem para escala de tons de cinza **/
 	public Imagem paraTonsDeCinza(Imagem imagem) {
@@ -227,7 +234,7 @@ public class PreProcessamento {
 			sigma = 0.33;
 		}
 		
-		imagem = filtroGaussiano(imagem, 3, 0);
+//		imagem = filtroGaussiano(imagem, 3, 0);
 		
 		Mat saida = new Mat(imagem.getMatriz().height(), imagem.getMatriz().width(), imagem.getMatriz().type());
 		MatOfDouble mu = new MatOfDouble();
@@ -239,7 +246,7 @@ public class PreProcessamento {
 		int max = (int)Math.min(255, (1.0 + sigma) * media);
 		
 		Imgproc.Canny(imagem.getMatriz(), saida, min, max);
-		return new Imagem(imagem.getNome() +"_cann", imagem.getFormato(), diretorioSaida, saida);
+		return new Imagem(imagem.getNome() +"_cannA", imagem.getFormato(), diretorioSaida, saida);
 	}
 	
 	/** Aplica filtro laplaciano na imagem **/
