@@ -1,6 +1,7 @@
 import org.opencv.core.Core;
 import org.opencv.core.CvType;
 import org.opencv.core.Mat;
+import org.opencv.core.MatOfDouble;
 import org.opencv.core.Size;
 import org.opencv.imgproc.Imgproc;
 
@@ -35,7 +36,7 @@ public class PreProcessamento {
 	}
 	
 	/** Converte imagem para preto e branco usando limiar local 
-	 * @param blockSize: Tamanho da area de vizinhança
+	 * @param blockSize: Tamanho da area de vizinhança (impar)
 	 * @param C: Apenas uma constante que eh subtraida da media ou media ponderada.
 	 * **/
 	public Imagem paraPretoEBrancoLocal(Imagem imagem, int blockSize, double C) { // 15, 40
@@ -211,6 +212,34 @@ public class PreProcessamento {
 		
 		Imgproc.filter2D(imagem.getMatriz(), saida, -1, mask);
 		return new Imagem(imagem.getNome() +"_sobe"+orientation, imagem.getFormato(), diretorioSaida, saida);
+	}
+	
+	/** Aplica filtro canny na imagem **/
+	public Imagem filtroCanny(Imagem imagem, double thresh1, double thresh2, int aperture) { // 10, 100, 5
+		Mat saida = new Mat(imagem.getMatriz().height(), imagem.getMatriz().width(), imagem.getMatriz().type());
+		Imgproc.Canny(imagem.getMatriz(), saida, thresh1, thresh2, aperture, true);
+		return new Imagem(imagem.getNome() +"_cann", imagem.getFormato(), diretorioSaida, saida);
+	}
+	
+	/** Aplica filtro canny automatico na imagem **/
+	public Imagem filtroAutoCanny(Imagem imagem, double sigma) {
+		if(sigma <= 0){
+			sigma = 0.33;
+		}
+		
+		imagem = filtroGaussiano(imagem, 3, 0);
+		
+		Mat saida = new Mat(imagem.getMatriz().height(), imagem.getMatriz().width(), imagem.getMatriz().type());
+		MatOfDouble mu = new MatOfDouble();
+		MatOfDouble sigma2 = new MatOfDouble();
+		Core.meanStdDev(imagem.getMatriz(), mu, sigma2);
+		double media = mu.get(0, 0)[0];
+		
+		int min = (int)Math.max(0, (1.0 - sigma) * media);
+		int max = (int)Math.min(255, (1.0 + sigma) * media);
+		
+		Imgproc.Canny(imagem.getMatriz(), saida, min, max);
+		return new Imagem(imagem.getNome() +"_cann", imagem.getFormato(), diretorioSaida, saida);
 	}
 	
 	/** Aplica filtro laplaciano na imagem **/

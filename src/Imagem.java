@@ -35,6 +35,10 @@ public class Imagem {
 	public String getCaminho() {
 		return caminho;
 	}
+	
+	public String getCaminhoCompleto() {
+		return caminho + nome + formato;
+	}
 
 	public Imagem setCaminho(String caminho) {
 		this.caminho = caminho;
