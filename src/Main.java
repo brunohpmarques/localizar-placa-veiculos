@@ -49,9 +49,9 @@ public class Main {
 			PreProcessamento pp = new PreProcessamento(DIRECT_PREPROCESSAMENTO);
 			
 			// EXEMPLO
-			Imagem imgTemp = pp.paraTonsDeCinza(listaImagensEntrada.get(0)).gravar();
-			imgTemp = pp.filtroNitidez(imgTemp, 10, 1.5, -0.5, 0).gravar();
-			imgTemp = pp.filtroPrewitt(imgTemp, PreProcessamento.TODOS).gravar();
+			Imagem imgTemp = pp.paraTonsDeCinza(listaImagensEntrada.get(2));
+			pp.paraPretoEBrancoGlobal(imgTemp, 127).gravar();
+			pp.paraPretoEBrancoLocal(imgTemp, 15, 40).gravar();
 			
 			System.out.println("Fim do pre-processamento."); 
 			

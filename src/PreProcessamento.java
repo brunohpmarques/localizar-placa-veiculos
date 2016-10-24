@@ -27,11 +27,22 @@ public class PreProcessamento {
 	}
 
 	/** Converte imagem para preto e branco **/
-	public Imagem paraPretoEBranco(Imagem imagem, double thresh) {
+	public Imagem paraPretoEBrancoGlobal(Imagem imagem, double thresh) { // 127
         Mat saida = new Mat(imagem.getMatriz().height(), imagem.getMatriz().width(), imagem.getMatriz().type());
         
-		Imgproc.threshold(imagem.getMatriz(), saida, thresh, 255, Imgproc.THRESH_BINARY); // 127
-		return new Imagem(imagem.getNome() +"_limi", imagem.getFormato(), diretorioSaida, saida);
+		Imgproc.threshold(imagem.getMatriz(), saida, thresh, 255, Imgproc.THRESH_BINARY);
+		return new Imagem(imagem.getNome() +"_limiG", imagem.getFormato(), diretorioSaida, saida);
+	}
+	
+	/** Converte imagem para preto e branco usando limiar local 
+	 * @param blockSize: Tamanho da area de vizinhança
+	 * @param C: Apenas uma constante que eh subtraida da media ou media ponderada.
+	 * **/
+	public Imagem paraPretoEBrancoLocal(Imagem imagem, int blockSize, double C) { // 15, 40
+        Mat saida = new Mat(imagem.getMatriz().height(), imagem.getMatriz().width(), imagem.getMatriz().type());
+        
+		Imgproc.adaptiveThreshold(imagem.getMatriz(), saida, 255, Imgproc.ADAPTIVE_THRESH_GAUSSIAN_C, Imgproc.THRESH_BINARY, blockSize, C);
+		return new Imagem(imagem.getNome() +"_limiL", imagem.getFormato(), diretorioSaida, saida);
 	}
 
 	/** Adiciona contraste na imagem **/
