@@ -6,14 +6,7 @@ public class Imagem {
 	private String formato;
 	private String caminho;
 	private Mat matriz;
-	
-	public Imagem(String nome, String formato, String caminho) {
-		this.nome = nome;
-		this.formato = formato;
-		this.caminho = caminho.replace(nome + formato, "");
-		this.ler();
-	}
-	
+		
 	public Imagem(String nome, String formato, String caminho, Mat matriz) {
 		this.nome = nome;
 		this.formato = formato;
@@ -55,12 +48,6 @@ public class Imagem {
 	public Imagem setMatriz(Mat matriz) {
 		this.matriz = matriz;
 		return this;		
-	}
-	
-	/** Le arquivo de imagem com nome e formato no caminho setado **/
-	public Imagem ler(){
-		this.matriz = Imgcodecs.imread(this.caminho, Imgcodecs.CV_LOAD_IMAGE_COLOR);
-		return this;
 	}
 	
 	/** Grava arquivo de imagem com nome e formato no caminho setado **/

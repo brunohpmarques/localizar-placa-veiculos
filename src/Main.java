@@ -104,7 +104,8 @@ public class Main {
 				if(type.equals("image")){
 					type = getFileExtension(arquivo);
 					mimetype = arquivo.getName().replaceAll(type, "");
-					listaImagens.add(new Imagem(mimetype, type, arquivo.getAbsolutePath()));
+					matriz = Imgcodecs.imread(arquivo.getAbsolutePath(), Imgcodecs.CV_LOAD_IMAGE_COLOR);
+					listaImagens.add(new Imagem(mimetype, type, arquivo.getAbsolutePath(), matriz));
 					if(max > 0 && listaImagens.size() == max){
 						break;
 					}
