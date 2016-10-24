@@ -78,7 +78,7 @@ public class Main {
 		try{
 			
 			System.out.println("Carregando imagens de entrada."); 
-			ArrayList<Imagem> listaImagensEntrada = getListaImagens(DIRECT_ENTRADA, 50);
+			ArrayList<Imagem> listaImagensEntrada = getListaImagens(DIRECT_ENTRADA, 10);
 //			Collections.shuffle(listaImagensEntrada);
 			
 			dateFim = new Date();
@@ -88,9 +88,11 @@ public class Main {
 			dateTemp = new Date();
 			System.out.println("Iniciando pre-processamento as "+ dateTemp.toString()); 
 			PreProcessamento pp = new PreProcessamento(DIRECT_PREPROCESSAMENTO);
+			Segmentacao s = new Segmentacao(DIRECT_SEGMENTACAO);
 			
 			// PRE-PROCESSAMENTO
 			Imagem imgTemp;
+			ArrayList<Imagem> regioesCandidatas;
 			for (Imagem imagem : listaImagensEntrada) {
 				imgTemp = pp.paraTonsDeCinza(imagem);
 //				imgTemp = pp.normalizar(imgTemp);
@@ -101,6 +103,12 @@ public class Main {
 				
 				imgTemp = pp.filtroAutoCanny(imgTemp, 0);
 				imgTemp.gravar();
+				
+				
+				regioesCandidatas = s.getRegioesCandidatas(imagem, imgTemp, 50);
+				for (Imagem candidata : regioesCandidatas) {
+					candidata.gravar();
+				}
 			}
 			
 			dateFim = new Date();

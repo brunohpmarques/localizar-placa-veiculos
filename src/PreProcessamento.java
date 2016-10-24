@@ -20,14 +20,14 @@ public class PreProcessamento {
 	
 	/** Normaliza imagem de entrada **/
 	public Imagem normalizar(Imagem imagem) {
-        Mat saida = new Mat(imagem.getMatriz().height(), imagem.getMatriz().width(), imagem.getMatriz().type());
+		Mat saida = imagem.getMatriz().clone();
         Imgproc.equalizeHist(imagem.getMatriz(), saida);
 		return new Imagem(imagem.getNome() +"_norm", imagem.getFormato(), diretorioSaida, saida);
 	}
 
 	/** Converte imagem para escala de tons de cinza **/
 	public Imagem paraTonsDeCinza(Imagem imagem) {
-        Mat saida = new Mat(imagem.getMatriz().height(), imagem.getMatriz().width(), imagem.getMatriz().type());
+		Mat saida = imagem.getMatriz().clone();
         saida.put(0, 0);
         
 		Imgproc.cvtColor(imagem.getMatriz(), saida, Imgproc.COLOR_RGB2GRAY);
@@ -36,7 +36,7 @@ public class PreProcessamento {
 
 	/** Converte imagem para preto e branco **/
 	public Imagem paraPretoEBrancoGlobal(Imagem imagem, double thresh) { // 127
-        Mat saida = new Mat(imagem.getMatriz().height(), imagem.getMatriz().width(), imagem.getMatriz().type());
+		Mat saida = imagem.getMatriz().clone();
         
 		Imgproc.threshold(imagem.getMatriz(), saida, thresh, 255, Imgproc.THRESH_BINARY);
 		return new Imagem(imagem.getNome() +"_limiG", imagem.getFormato(), diretorioSaida, saida);
@@ -47,15 +47,23 @@ public class PreProcessamento {
 	 * @param C: Apenas uma constante que eh subtraida da media ou media ponderada.
 	 * **/
 	public Imagem paraPretoEBrancoLocal(Imagem imagem, int blockSize, double C) { // 15, 40
-        Mat saida = new Mat(imagem.getMatriz().height(), imagem.getMatriz().width(), imagem.getMatriz().type());
+		Mat saida = imagem.getMatriz().clone();
         
 		Imgproc.adaptiveThreshold(imagem.getMatriz(), saida, 255, Imgproc.ADAPTIVE_THRESH_GAUSSIAN_C, Imgproc.THRESH_BINARY, blockSize, C);
 		return new Imagem(imagem.getNome() +"_limiL", imagem.getFormato(), diretorioSaida, saida);
 	}
 
+	/** Converte imagem para preto e branco usando algoritmo de OTSU **/
+	public Imagem paraPretoEBrancoOTSU(Imagem imagem){
+		Mat saida = imagem.getMatriz().clone();
+		
+		Imgproc.threshold(imagem.getMatriz(), saida, 0, 255, Imgproc.THRESH_OTSU+Imgproc.THRESH_BINARY);
+		return new Imagem(imagem.getNome() +"_otsu", imagem.getFormato(), diretorioSaida, saida);
+	}
+	
 	/** Adiciona contraste na imagem **/
 	public Imagem filtroContraste(Imagem imagem) {
-		Mat saida = new Mat(imagem.getMatriz().height(), imagem.getMatriz().width(), imagem.getMatriz().type());
+		Mat saida = imagem.getMatriz().clone();
 
 		Imgproc.equalizeHist(imagem.getMatriz(), saida);
 		return new Imagem(imagem.getNome() +"_cont", imagem.getFormato(), diretorioSaida, saida);
@@ -63,7 +71,7 @@ public class PreProcessamento {
 
 	/** Adiciona birlho na imagem **/
 	public Imagem filtroBrilho(Imagem imagem, double alpha, double beta) { // 10, 50
-		Mat saida = new Mat(imagem.getMatriz().height(), imagem.getMatriz().width(), imagem.getMatriz().type());
+		Mat saida = imagem.getMatriz().clone();
 
 		imagem.getMatriz().convertTo(saida, -1, alpha, beta);
 		return new Imagem(imagem.getNome() +"_bril", imagem.getFormato(), diretorioSaida, saida);
@@ -71,7 +79,7 @@ public class PreProcessamento {
 
 	/** Adiciona nitidez na imagem **/
 	public Imagem filtroNitidez(Imagem imagem, double sigmaX, double alpha, double beta, double gamma) { // 10, 1.5, -0.5, 0
-		Mat saida = new Mat(imagem.getMatriz().height(), imagem.getMatriz().width(), imagem.getMatriz().type());
+		Mat saida = imagem.getMatriz().clone();
 		Imgproc.GaussianBlur(imagem.getMatriz(), saida, new Size(0, 0), sigmaX);
 
 		Core.addWeighted(imagem.getMatriz(), alpha, saida, alpha, gamma, saida); 
@@ -80,7 +88,7 @@ public class PreProcessamento {
 
 	/** Aplica filtro box na imagem **/
 	public Imagem filtroBox(Imagem imagem, int maskOrder) { // 4
-		Mat saida = new Mat(imagem.getMatriz().height(), imagem.getMatriz().width(), imagem.getMatriz().type());
+		Mat saida = imagem.getMatriz().clone();
 		Mat mask = Mat.ones(maskOrder, maskOrder, CvType.CV_32F);
 
 		for (int i = 0; i < mask.rows(); i++) {
@@ -101,7 +109,7 @@ public class PreProcessamento {
 
 	/** Aplica filtro gaussiano na imagem **/
 	public Imagem filtroGaussiano(Imagem imagem, int maskOrder, double sigmaX) { // 4, 9
-		Mat saida = new Mat(imagem.getMatriz().height(), imagem.getMatriz().width(), imagem.getMatriz().type());
+		Mat saida = imagem.getMatriz().clone();
 		Imgproc.GaussianBlur(imagem.getMatriz(), saida, new Size(maskOrder, maskOrder), sigmaX);
 		
 		return new Imagem(imagem.getNome() +"_gaus", imagem.getFormato(), diretorioSaida, saida);
@@ -109,7 +117,7 @@ public class PreProcessamento {
 
 	/** Aplica erosao na imagem **/
 	public Imagem morfoErosao(Imagem imagem, int tamanhoErosao) { // 3
-		Mat saida = new Mat(imagem.getMatriz().height(), imagem.getMatriz().width(), imagem.getMatriz().type());
+		Mat saida = imagem.getMatriz().clone();
 		Mat elemento = Imgproc.getStructuringElement(Imgproc.MORPH_RECT, new Size(2 * tamanhoErosao + 1, 2 * tamanhoErosao + 1));
 		Imgproc.erode(imagem.getMatriz(), saida, elemento);
 		
@@ -118,16 +126,34 @@ public class PreProcessamento {
 
 	/** Aplica dilatacao na imagem **/
 	public Imagem morfoDilatacao(Imagem imagem, int tamanhoDilatacao) { // 3
-		Mat saida = new Mat(imagem.getMatriz().height(), imagem.getMatriz().width(), imagem.getMatriz().type());
+		Mat saida = imagem.getMatriz().clone();
 		Mat elemento = Imgproc.getStructuringElement(Imgproc.MORPH_RECT, new Size(2 * tamanhoDilatacao + 1, 2 * tamanhoDilatacao + 1));
 		Imgproc.dilate(imagem.getMatriz(), saida, elemento);
 		
 		return new Imagem(imagem.getNome() +"_dila", imagem.getFormato(), diretorioSaida, saida);
 	}
+	
+	/** Aplica operacao de fechamento na imagem **/
+	public Imagem morfoFechamento(Imagem imagem, int largura, int altura){// 17, 3
+		Mat saida = imagem.getMatriz().clone();
+		Mat elemento = Imgproc.getStructuringElement(Imgproc.MORPH_RECT, new Size(largura, altura) );
+	    Imgproc.morphologyEx(imagem.getMatriz(), saida, Imgproc.MORPH_CLOSE, elemento);
+	    
+	    return new Imagem(imagem.getNome() +"_fech", imagem.getFormato(), diretorioSaida, saida);
+	}
+	
+	/** Aplica operacao de abertura na imagem **/
+	public Imagem morfoAbertura(Imagem imagem, int largura, int altura){// 17, 3
+		Mat saida = imagem.getMatriz().clone();
+		Mat elemento = Imgproc.getStructuringElement(Imgproc.MORPH_RECT, new Size(largura, altura) );
+	    Imgproc.morphologyEx(imagem.getMatriz(), saida, Imgproc.MORPH_OPEN, elemento);
+	    
+	    return new Imagem(imagem.getNome() +"_aber", imagem.getFormato(), diretorioSaida, saida);
+	}
 
 	/** Aplica Prewitt na imagem **/
 	public Imagem filtroPrewitt(Imagem imagem, char orientation) {
-		Mat saida = new Mat(imagem.getMatriz().height(), imagem.getMatriz().width(), imagem.getMatriz().type());
+		Mat saida = imagem.getMatriz().clone();
 		Mat mask = new Mat(3, 3, CvType.CV_32F);
 		
 		if(orientation == HORIZONTAL){
@@ -175,7 +201,7 @@ public class PreProcessamento {
 
 	/** Aplica Sobel na imagem **/
 	public Imagem filtroSobel(Imagem imagem, char orientation) {
-		Mat saida = new Mat(imagem.getMatriz().height(), imagem.getMatriz().width(), imagem.getMatriz().type());
+		Mat saida = imagem.getMatriz().clone();
 		Mat mask = new Mat(3, 3, CvType.CV_32F);
 		
 		if(orientation == HORIZONTAL){
@@ -223,7 +249,7 @@ public class PreProcessamento {
 	
 	/** Aplica filtro canny na imagem **/
 	public Imagem filtroCanny(Imagem imagem, double thresh1, double thresh2, int aperture) { // 10, 100, 5
-		Mat saida = new Mat(imagem.getMatriz().height(), imagem.getMatriz().width(), imagem.getMatriz().type());
+		Mat saida = imagem.getMatriz().clone();
 		Imgproc.Canny(imagem.getMatriz(), saida, thresh1, thresh2, aperture, true);
 		return new Imagem(imagem.getNome() +"_cann", imagem.getFormato(), diretorioSaida, saida);
 	}
@@ -236,7 +262,7 @@ public class PreProcessamento {
 		
 //		imagem = filtroGaussiano(imagem, 3, 0);
 		
-		Mat saida = new Mat(imagem.getMatriz().height(), imagem.getMatriz().width(), imagem.getMatriz().type());
+		Mat saida = imagem.getMatriz().clone();
 		MatOfDouble mu = new MatOfDouble();
 		MatOfDouble sigma2 = new MatOfDouble();
 		Core.meanStdDev(imagem.getMatriz(), mu, sigma2);
@@ -251,7 +277,7 @@ public class PreProcessamento {
 	
 	/** Aplica filtro laplaciano na imagem **/
 	public Imagem filtroLaplaciano(Imagem imagem, char valor) {
-		Mat saida = new Mat(imagem.getMatriz().height(), imagem.getMatriz().width(), imagem.getMatriz().type());
+		Mat saida = imagem.getMatriz().clone();
 		Mat mask = new Mat(3, 3, CvType.CV_32F);
 		
 		if(valor == NEGATIVA){
