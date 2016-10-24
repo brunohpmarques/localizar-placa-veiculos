@@ -1,6 +1,7 @@
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.util.ArrayList;
+import java.util.Date;
 
 import javax.activation.MimetypesFileTypeMap;
 
@@ -39,31 +40,48 @@ public class Main {
 		}
 	}
 	
-	public static void main(String[] args) {  
+	public static void main(String[] args) { 
+		Date dateIni = new Date();
+		Date dateTemp;
+		Date dateFim;
+		System.out.println("INICIOU AS: "+ dateIni.toString() +"\n");
 		try{
-			System.out.println("Carregando imagens de entrada."); 
-			ArrayList<Imagem> listaImagensEntrada = getListaImagens(DIRECT_ENTRADA);
-			System.out.println(listaImagensEntrada.size() +" imagens de entrada carregadas."); 
 			
-			System.out.println("Iniciando pre-processamento."); 
+			System.out.println("Carregando imagens de entrada."); 
+			ArrayList<Imagem> listaImagensEntrada = getListaImagens(DIRECT_ENTRADA, -1);
+			dateFim = new Date();
+			dateFim.setTime(dateFim.getTime()-dateIni.getTime());
+			System.out.println(listaImagensEntrada.size() +" imagens de entrada carregadas em "+ (dateFim.getTime()/1000) +" segundos.\n");
+						
+			dateTemp = new Date();
+			System.out.println("Iniciando pre-processamento as "+ dateTemp.toString()); 
 			PreProcessamento pp = new PreProcessamento(DIRECT_PREPROCESSAMENTO);
 			
-			// EXEMPLO
-			Imagem imgTemp = pp.paraTonsDeCinza(listaImagensEntrada.get(2));
-			pp.paraPretoEBrancoGlobal(imgTemp, 127).gravar();
-			pp.paraPretoEBrancoLocal(imgTemp, 15, 40).gravar();
+			// PRE-PROCESSAMENTO
+			Imagem imgTemp;
+			for (Imagem imagem : listaImagensEntrada) {
+				imgTemp = pp.paraTonsDeCinza(imagem);
+				pp.paraPretoEBrancoGlobal(imgTemp, 127).gravar();
+				pp.paraPretoEBrancoLocal(imgTemp, 21, 20).gravar();
+			}
 			
-			System.out.println("Fim do pre-processamento."); 
+			dateFim = new Date();
+			dateFim.setTime(dateFim.getTime()-dateIni.getTime());
+			System.out.println("Fim do pre-processamento em "+ (dateFim.getTime()/1000) +" segundos.\n"); 
 			
 			System.out.println("Fim com sucesso.");
 		}catch (Exception e) {
 			e.printStackTrace();
 			System.out.println("Fim com erro.");
 		}
+		dateFim = new Date();
+		System.out.println("\nTERMINOU AS: "+ dateFim.toString());
+		dateFim.setTime(dateFim.getTime()-dateIni.getTime());
+		System.out.println("DURACAO: "+ dateFim.getTime()/1000 +" SEGUNDOS");
 	}
 	
 	/** Instancia lista com todas as imagens de um diretorio **/
-	public static ArrayList<Imagem> getListaImagens(String diretorio) throws FileNotFoundException{
+	public static ArrayList<Imagem> getListaImagens(String diretorio, int max) throws FileNotFoundException{
 		File arquivos = new File(diretorio);
 		
 		if(!arquivos.isDirectory()){
@@ -88,6 +106,9 @@ public class Main {
 					mimetype = arquivo.getName().replaceAll(type, "");
 					matriz = Imgcodecs.imread(arquivo.getAbsolutePath(), Imgcodecs.CV_LOAD_IMAGE_COLOR);
 					listaImagens.add(new Imagem(mimetype, type, arquivo.getAbsolutePath(), matriz));
+					if(max > 0 && listaImagens.size() == max){
+						break;
+					}
 				}		
 			}
 		}
