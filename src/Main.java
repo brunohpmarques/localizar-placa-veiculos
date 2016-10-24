@@ -48,7 +48,7 @@ public class Main {
 		try{
 			
 			System.out.println("Carregando imagens de entrada."); 
-			ArrayList<Imagem> listaImagensEntrada = getListaImagens(DIRECT_ENTRADA, -1);
+			ArrayList<Imagem> listaImagensEntrada = getListaImagens(DIRECT_ENTRADA, 10);
 			dateFim = new Date();
 			dateFim.setTime(dateFim.getTime()-dateIni.getTime());
 			System.out.println(listaImagensEntrada.size() +" imagens de entrada carregadas em "+ (dateFim.getTime()/1000) +" segundos.\n");
@@ -104,8 +104,7 @@ public class Main {
 				if(type.equals("image")){
 					type = getFileExtension(arquivo);
 					mimetype = arquivo.getName().replaceAll(type, "");
-					matriz = Imgcodecs.imread(arquivo.getAbsolutePath(), Imgcodecs.CV_LOAD_IMAGE_COLOR);
-					listaImagens.add(new Imagem(mimetype, type, arquivo.getAbsolutePath(), matriz));
+					listaImagens.add(new Imagem(mimetype, type, arquivo.getAbsolutePath()));
 					if(max > 0 && listaImagens.size() == max){
 						break;
 					}
