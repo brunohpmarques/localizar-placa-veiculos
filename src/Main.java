@@ -10,8 +10,7 @@ import org.opencv.core.Core;
 import org.opencv.core.Mat;
 import org.opencv.imgcodecs.Imgcodecs;
 
-// http://www.w3ii.com/pt/java_dip/default.html
-// https://github.com/openalpr/openalpr
+// tutorial http://www.w3ii.com/pt/java_dip/default.html
 
 /*
 http://stackoverflow.com/questions/37302098/image-preprocessing-with-opencv-before-doing-character-recognition-tesseract
@@ -44,7 +43,7 @@ http://stackoverflow.com/questions/20276209/find-the-plate-rectangle-in-a-given-
 public class Main {
 	
 	private static final String DIRECT_PROJECT = System.getProperty("user.dir");
-	private static final String DIRECT_ENTRADA = DIRECT_PROJECT +"\\entrada";
+	private static final String DIRECT_ENTRADA = DIRECT_PROJECT +"\\entrada2";
 	private static final String DIRECT_PREPROCESSAMENTO = DIRECT_PROJECT +"\\preprocessamento";
 	private static final String DIRECT_SEGMENTACAO = DIRECT_PROJECT +"\\segmentacao";
 	
@@ -88,19 +87,30 @@ public class Main {
 			dateTemp = new Date();
 			System.out.println("Iniciando pre-processamento as "+ dateTemp.toString()); 
 			PreProcessamento pp = new PreProcessamento(DIRECT_PREPROCESSAMENTO);
+			Segmentacao s = new Segmentacao(DIRECT_SEGMENTACAO);
 			
 			// PRE-PROCESSAMENTO
 			Imagem imgTemp;
+			ArrayList<Imagem> regioesCandidatas;
 			for (Imagem imagem : listaImagensEntrada) {
+
 				imgTemp = pp.paraTonsDeCinza(imagem);
-//				imgTemp = pp.normalizar(imgTemp);
-								
-				imgTemp = pp.filtroGaussiano(imagem, 3, 0);
-//				imgTemp = pp.filtroSobel(imgTemp, PreProcessamento.TODOS);
-//				imgTemp = pp.paraPretoEBrancoLocal(imgTemp, 21, 20);
+				imgTemp = pp.normalizar(imgTemp);			
+				imgTemp = pp.filtroGaussiano(imagem, 3, 0);				
+				
+//				imgTemp = pp.morfoFechamento(imgTemp, 5, 5);	// 5, 5
+//				imgTemp = pp.morfoErosao(imgTemp, 5);			// 5
+//				imgTemp = pp.morfoDilatacao(imgTemp, 5);		// 5
 				
 				imgTemp = pp.filtroAutoCanny(imgTemp, 0);
+				
+				
 				imgTemp.gravar();
+
+				regioesCandidatas = s.getRegioesCandidatas3(imagem, imgTemp, 0.5);
+				for (Imagem candidata : regioesCandidatas) {
+					candidata.gravar();
+				}
 			}
 			
 			dateFim = new Date();
