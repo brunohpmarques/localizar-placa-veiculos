@@ -77,7 +77,7 @@ public class Main {
 		try{
 			
 			System.out.println("Carregando imagens de entrada."); 
-			ArrayList<Imagem> listaImagensEntrada = getListaImagens(DIRECT_ENTRADA, 50);
+			ArrayList<Imagem> listaImagensEntrada = getListaImagens(DIRECT_ENTRADA, 10);
 //			Collections.shuffle(listaImagensEntrada);
 			
 			dateFim = new Date();
@@ -103,7 +103,6 @@ public class Main {
 //				imgTemp = pp.morfoDilatacao(imgTemp, 5);		// 5
 				
 				imgTemp = pp.filtroAutoCanny(imgTemp, 0);
-				
 				
 				imgTemp.gravar();
 

@@ -118,18 +118,18 @@ public class PreProcessamento {
 	/** Aplica erosao na imagem **/
 	public Imagem morfoErosao(Imagem imagem, int tamanhoErosao) { // 3
 		Mat saida = imagem.getMatriz().clone();
+
 		Mat elemento = Imgproc.getStructuringElement(Imgproc.MORPH_RECT, new Size(tamanhoErosao, tamanhoErosao));
 		Imgproc.erode(imagem.getMatriz(), saida, elemento);
-		
 		return new Imagem(imagem.getNome() +"_eros", imagem.getFormato(), diretorioSaida, saida);
 	}
 
 	/** Aplica dilatacao na imagem **/
 	public Imagem morfoDilatacao(Imagem imagem, int tamanhoDilatacao) { // 3
 		Mat saida = imagem.getMatriz().clone();
+
 		Mat elemento = Imgproc.getStructuringElement(Imgproc.MORPH_RECT, new Size(tamanhoDilatacao, tamanhoDilatacao));
 		Imgproc.dilate(imagem.getMatriz(), saida, elemento);
-		
 		return new Imagem(imagem.getNome() +"_dila", imagem.getFormato(), diretorioSaida, saida);
 	}
 	
@@ -248,9 +248,16 @@ public class PreProcessamento {
 	}
 	
 	/** Aplica filtro canny na imagem **/
-	public Imagem filtroCanny(Imagem imagem, double thresh1, double thresh2) { // 10, 100, 5
+	public Imagem filtroCanny(Imagem imagem, double thresh1, double thresh2) {
 		Mat saida = imagem.getMatriz().clone();
 		Imgproc.Canny(imagem.getMatriz(), saida, thresh1, thresh2);
+		return new Imagem(imagem.getNome() +"_cann", imagem.getFormato(), diretorioSaida, saida);
+  }
+
+  /** Aplica filtro canny na imagem **/
+	public Imagem filtroCanny(Imagem imagem, double thresh1, double thresh2, int aperture) { // 10, 100, 5
+		Mat saida = imagem.getMatriz().clone();
+		Imgproc.Canny(imagem.getMatriz(), saida, thresh1, thresh2, aperture, true);
 		return new Imagem(imagem.getNome() +"_cann", imagem.getFormato(), diretorioSaida, saida);
 	}
 	

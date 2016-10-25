@@ -24,7 +24,7 @@ private String diretorioSaida;
 	
 	public ArrayList<Imagem> getRegioesCandidatas(Imagem imagemOriginal, Imagem processada, int largura){
 		ArrayList<Imagem> regioesCandidatas = new ArrayList<Imagem>();
-		List<MatOfPoint> contours = new ArrayList<MatOfPoint>();
+    List<MatOfPoint> contours = new ArrayList<MatOfPoint>();
 	    Mat hierarchy = new Mat();
 	    Mat saida = processada.getMatriz().clone();
 	    Imgproc.findContours(processada.getMatriz(), contours, hierarchy, 0, 1);
@@ -38,6 +38,7 @@ private String diretorioSaida;
 	    for(int i = 0; i < contours.size(); i++){
 	        if (contours.get(i).toList().size() > 100){ 
 	            contours.get(i).convertTo(mMOP2f1, CvType.CV_32FC2);
+
 	            Imgproc.approxPolyDP(mMOP2f1, mMOP2f2, 5, true);
 	            mMOP2f2.convertTo(contours_poly.get(i), CvType.CV_32S);
 	            Rect appRect = Imgproc.boundingRect(contours_poly.get(i));
@@ -49,7 +50,7 @@ private String diretorioSaida;
 	                
 	                Rect roi = new Rect(appRect.x, appRect.y, appRect.width, appRect.height);
 	                Mat cropped = new Mat(imagemOriginal.getMatriz(), roi);
-	                
+
 	                Imgproc.drawContours(imagemOriginal.getMatriz(), contours_poly, i, new Scalar(255, 0, 255));
 	                regioesCandidatas.add(new Imagem(imagemOriginal.getNome() +"_cand_"+i, imagemOriginal.getFormato(), diretorioSaida, cropped));
 	            }
