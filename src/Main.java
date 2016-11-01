@@ -9,6 +9,7 @@ import javax.activation.MimetypesFileTypeMap;
 import org.opencv.core.Core;
 import org.opencv.core.Mat;
 import org.opencv.imgcodecs.Imgcodecs;
+import org.opencv.imgproc.Imgproc;
 
 // tutorial http://www.w3ii.com/pt/java_dip/default.html
 
@@ -43,7 +44,7 @@ http://stackoverflow.com/questions/20276209/find-the-plate-rectangle-in-a-given-
 public class Main {
 	
 	private static final String DIRECT_PROJECT = System.getProperty("user.dir");
-	private static final String DIRECT_ENTRADA = DIRECT_PROJECT +"\\entrada2";
+	private static final String DIRECT_ENTRADA = DIRECT_PROJECT +"\\entrada";
 	private static final String DIRECT_PREPROCESSAMENTO = DIRECT_PROJECT +"\\preprocessamento";
 	private static final String DIRECT_SEGMENTACAO = DIRECT_PROJECT +"\\segmentacao";
 	
@@ -66,6 +67,9 @@ public class Main {
 		
 		if(!fs.exists()){
 			fs.mkdirs();
+		}else{
+			fs.delete();
+			fs.mkdirs();
 		}
 	}
 	
@@ -77,7 +81,7 @@ public class Main {
 		try{
 			
 			System.out.println("Carregando imagens de entrada."); 
-			ArrayList<Imagem> listaImagensEntrada = getListaImagens(DIRECT_ENTRADA, 10);
+			ArrayList<Imagem> listaImagensEntrada = getListaImagens(DIRECT_ENTRADA, 50);
 //			Collections.shuffle(listaImagensEntrada);
 			
 			dateFim = new Date();
@@ -92,24 +96,43 @@ public class Main {
 			// PRE-PROCESSAMENTO
 			Imagem imgTemp;
 			ArrayList<Imagem> regioesCandidatas;
-			for (Imagem imagem : listaImagensEntrada) {
-
+			for (Imagem imagem : listaImagensEntrada) {			
+				
+//        Gaussiano, tons de cinza, binarizar, dilatacao e erosao, canny
+//        cvSmooth(orgImg,orgImg,CV_GAUSSIAN,7);
+//        cvCvtColor(orgImg,grayImg,CV_BGR2GRAY);
+//        cvThreshold(grayImg,grayImg,230,255,CV_THRESH_BINARY_INV);  
+//        cvErode(grayImg,grayImg,null,3);
+//        cvDilate(grayImg,grayImg,null,2);
+				
+				// SEGUNDA OPCAO
+//				imgTemp = pp.filtroGaussiano(imagem, 7, 0);	
+//				imgTemp = pp.paraTonsDeCinza(imgTemp);
+//				imgTemp = pp.filtroLaplaciano(imgTemp, PreProcessamento.NEGATIVA);
+//				imgTemp = pp.paraPretoEBrancoOTSU(imgTemp);
+//				imgTemp = pp.morfoErosao(imgTemp, 3);
+//				imgTemp = pp.morfoDilatacao(imgTemp, 2);
+//				imgTemp = pp.morfoFechamento(imgTemp, 27, 3);
+//				imgTemp = pp.filtroAutoCanny(imgTemp, 0);
+				
+				// MELHOR
 				imgTemp = pp.paraTonsDeCinza(imagem);
 				imgTemp = pp.normalizar(imgTemp);			
-				imgTemp = pp.filtroGaussiano(imagem, 3, 0);				
-				
-//				imgTemp = pp.morfoFechamento(imgTemp, 5, 5);	// 5, 5
-//				imgTemp = pp.morfoErosao(imgTemp, 5);			// 5
-//				imgTemp = pp.morfoDilatacao(imgTemp, 5);		// 5
-				
+				imgTemp = pp.filtroGaussiano(imagem, 3, 0);	
 				imgTemp = pp.filtroAutoCanny(imgTemp, 0);
 				
 				imgTemp.gravar();
 
 				regioesCandidatas = s.getRegioesCandidatas3(imagem, imgTemp, 0.5);
-				for (Imagem candidata : regioesCandidatas) {
-					candidata.gravar();
+				imgTemp = s.getPlaca(regioesCandidatas);
+				if(imgTemp == null){
+					System.err.println(imagem.getNome() +" é difícil");
+				}else{
+					imgTemp.gravar();
 				}
+//				for (Imagem candidata : regioesCandidatas) {
+//					candidata.gravar();
+//				}
 			}
 			
 			dateFim = new Date();

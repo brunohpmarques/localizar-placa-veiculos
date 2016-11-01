@@ -2,6 +2,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.ListIterator;
 
+import org.opencv.core.Core;
 import org.opencv.core.CvType;
 import org.opencv.core.Mat;
 import org.opencv.core.MatOfPoint;
@@ -14,14 +15,15 @@ import org.opencv.imgproc.Imgproc;
 
 
 public class Segmentacao {
-	
-private String diretorioSaida;
-	
+
+	private String diretorioSaida;
+	private double margemCor = 20; //20
+	private double minimoCor = 500; //500
+
 	public Segmentacao(String diretorioSaida){
 		this.diretorioSaida = diretorioSaida;
 	}
 
-	
 	public ArrayList<Imagem> getRegioesCandidatas(Imagem imagemOriginal, Imagem processada, int largura){
 		ArrayList<Imagem> regioesCandidatas = new ArrayList<Imagem>();
     List<MatOfPoint> contours = new ArrayList<MatOfPoint>();
@@ -108,10 +110,9 @@ private String diretorioSaida;
 		
 		return regioesCandidatas;
 	}
-	
 
 	// teste 3
-	public ArrayList<Imagem> getRegioesCandidatas3(Imagem imagemOriginal, Imagem processada, double margem){
+	public ArrayList<Imagem> getRegioesCandidatas3(Imagem imagemOriginal, Imagem processada, double margemTamanho){
 		ArrayList<Imagem> regioesCandidatas = new ArrayList<Imagem>();
 		List<MatOfPoint> contours = new ArrayList<MatOfPoint>();
 	    Mat hierarchy = new Mat();
@@ -133,18 +134,94 @@ private String diretorioSaida;
 	            	
 	            	Rect appRect = Imgproc.boundingRect(contours_poly.get(i));
 	            	double aspect = appRect.width / appRect.height;
-	            	if(aspect <= (2.66 + margem) && aspect >= (2 - margem)){
+	            	if(aspect <= (2.66 + margemTamanho) && aspect >= (2 - margemTamanho)){
 	            		Rect roi = new Rect(appRect.x, appRect.y, appRect.width, appRect.height);
 		                Mat cropped = new Mat(imagemOriginal.getMatriz(), roi);
 		                
-		                Imgproc.drawContours(imagemOriginal.getMatriz(), contours_poly, i, new Scalar(255, 0, 255));
-		                regioesCandidatas.add(new Imagem(imagemOriginal.getNome() +"_cand_"+i, imagemOriginal.getFormato(), diretorioSaida, cropped));
+//		                Imgproc.drawContours(imagemOriginal.getMatriz(), contours_poly, i, new Scalar(255, 0, 255));
+		                Imagem imgCandidata = new Imagem(imagemOriginal.getNome() +"_cand_"+i, imagemOriginal.getFormato(), diretorioSaida, cropped);
+		                
+		                
+		                //////////////////////////////////////////
+		                //Core.countNonZero(cropped);
+
+		                float count = getQuantidadePixelsClaros(cropped);
+		                imgCandidata.setQuantidadePixelsClaros(count);
+		                
+		                count = getQuantidadePixelsEscuros(cropped);
+		                imgCandidata.setQuantidadePixelsEscuros(count);
+
+		                regioesCandidatas.add(imgCandidata);
+		                
+		                //////////////////////////////////////////
+		                
+		            	
+//		                regioesCandidatas.add(imgCandidata);
 	            	}	            	
 	            }
 	        }   
 	    }
 	    
 	    return regioesCandidatas;
+	}
+	
+	private float getQuantidadePixelsClaros(Mat imagem){
+		double[] cor;
+		float countGray = 0;
+		for (int row = 0; row < imagem.width(); row++) {
+        	for (int col = 0; col < imagem.height(); col++) {
+        		cor = imagem.get(row, col);
+        		if(cor != null){
+        			// Se for aproximadamente cinza
+        			if((cor[0] <= (cor[1]+margemCor) && cor[0] >= (cor[1]-margemCor) 
+        			&& cor[1] <= (cor[2]+margemCor) && cor[1] >= (cor[2]-margemCor)
+        			&& cor[0] <= (cor[2]+margemCor) && cor[0] >= (cor[2]-margemCor))
+        			&& (cor[0]+cor[1]+cor[2]) >= minimoCor){
+        				countGray++;
+        			}
+        		}
+			}
+		}
+        //Numero de pixels claros do segmento / Numero de pixels do segmento
+		return (countGray / (imagem.width()*imagem.height()));
+	}
+	
+	private float getQuantidadePixelsEscuros(Mat imagem){
+		double[] cor;
+		float countBlack = 0;
+		for (int row = 0; row < imagem.width(); row++) {
+        	for (int col = 0; col < imagem.height(); col++) {
+        		cor = imagem.get(row, col);
+        		if(cor != null){        			
+        			// Se for aproximadamente preto
+        			if((cor[0] <= (cor[1]+margemCor) && cor[0] >= (cor[1]-margemCor) 
+                	&& cor[1] <= (cor[2]+margemCor) && cor[1] >= (cor[2]-margemCor)
+                	&& cor[0] <= (cor[2]+margemCor) && cor[0] >= (cor[2]-margemCor))
+                	&& (cor[0]+cor[1]+cor[2]) <= minimoCor){
+        				countBlack++;
+                	}
+        		}
+			}
+		}
+        //Numero de pixels escuros do segmento / Numero de pixels do segmento
+		return (countBlack / (imagem.width()*imagem.height()));
+	}
+	
+	// escolher candidata
+	public Imagem getPlaca(ArrayList<Imagem> listaCandidatas){       
+        Imagem max = null;
+        for (int i=0; i<listaCandidatas.size(); i++) {
+        	if(max == null 
+        	|| (listaCandidatas.get(i).getQuantidadePixelsClaros() > listaCandidatas.get(i).getQuantidadePixelsEscuros()
+        			&& listaCandidatas.get(i).getQuantidadePixelsClaros() > max.getQuantidadePixelsClaros() 
+        			&& listaCandidatas.get(i).getQuantidadePixelsEscuros() > max.getQuantidadePixelsEscuros())){
+        		max = listaCandidatas.get(i);
+                System.out.println("Pixels claros para "+ listaCandidatas.get(i).getNome()+": "+listaCandidatas.get(i).getQuantidadePixelsClaros());
+                System.out.println("Pixels escuros para "+ listaCandidatas.get(i).getNome()+": "+listaCandidatas.get(i).getQuantidadePixelsEscuros());
+                System.out.println();
+        	}
+		}
+		return max;
 	}
 	
 }

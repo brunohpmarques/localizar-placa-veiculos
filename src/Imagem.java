@@ -6,7 +6,9 @@ public class Imagem {
 	private String formato;
 	private String caminho;
 	private Mat matriz;
-		
+	private float quantidadePixelsClaros;
+	private float quantidadePixelsEscuros;
+
 	public Imagem(String nome, String formato, String caminho, Mat matriz) {
 		this.nome = nome;
 		this.formato = formato;
@@ -52,6 +54,22 @@ public class Imagem {
 	public Imagem setMatriz(Mat matriz) {
 		this.matriz = matriz;
 		return this;		
+	}
+	
+	public float getQuantidadePixelsClaros() {
+		return quantidadePixelsClaros;
+	}
+
+	public void setQuantidadePixelsClaros(float quantidade) {
+		this.quantidadePixelsClaros = quantidade;
+	}
+	
+	public float getQuantidadePixelsEscuros() {
+		return quantidadePixelsEscuros;
+	}
+
+	public void setQuantidadePixelsEscuros(float quantidade) {
+		this.quantidadePixelsEscuros = quantidade;
 	}
 	
 	/** Grava arquivo de imagem com nome e formato no caminho setado **/
