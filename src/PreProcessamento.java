@@ -2,6 +2,7 @@ import org.opencv.core.Core;
 import org.opencv.core.CvType;
 import org.opencv.core.Mat;
 import org.opencv.core.MatOfDouble;
+import org.opencv.core.Point;
 import org.opencv.core.Size;
 import org.opencv.imgproc.Imgproc;
 
@@ -62,12 +63,12 @@ public class PreProcessamento {
 	}
 	
 	/** Adiciona contraste na imagem **/
-	public Imagem filtroContraste(Imagem imagem) {
-		Mat saida = imagem.getMatriz().clone();
+	public Imagem filtroContraste(Imagem imagem, int value) { //10
+        Mat saida = new Mat(imagem.getMatriz().rows(), imagem.getMatriz().cols(), imagem.getMatriz().type());
+        imagem.getMatriz().convertTo(saida, -1, 10d * value / 100, 0);
+        return new Imagem(imagem.getNome() +"_cont", imagem.getFormato(), diretorioSaida, saida);
+    }
 
-		Imgproc.equalizeHist(imagem.getMatriz(), saida);
-		return new Imagem(imagem.getNome() +"_cont", imagem.getFormato(), diretorioSaida, saida);
-	}
 
 	/** Adiciona birlho na imagem **/
 	public Imagem filtroBrilho(Imagem imagem, double alpha, double beta) { // 10, 50
@@ -105,6 +106,13 @@ public class PreProcessamento {
 
 		Imgproc.filter2D(imagem.getMatriz(), saida, -1, mask);
 		return new Imagem(imagem.getNome() +"_box", imagem.getFormato(), diretorioSaida, saida);
+	}
+	
+	/** Aplica filtro mediana na imagem **/
+	public Imagem filtroMediana(Imagem imagem, int maskOrder) { // 4
+		Mat saida = imagem.getMatriz().clone();
+		Imgproc.medianBlur(imagem.getMatriz(), saida, maskOrder);
+		return new Imagem(imagem.getNome() +"_medi", imagem.getFormato(), diretorioSaida, saida);
 	}
 
 	/** Aplica filtro gaussiano na imagem **/
@@ -149,6 +157,54 @@ public class PreProcessamento {
 	    Imgproc.morphologyEx(imagem.getMatriz(), saida, Imgproc.MORPH_OPEN, elemento);
 	    
 	    return new Imagem(imagem.getNome() +"_aber", imagem.getFormato(), diretorioSaida, saida);
+	}
+	
+	/** Aplica operacao de fechamento horizontal ou vertical na imagem **/
+	public Imagem morfoFechamentoOrientacao(Imagem imagem, char orientacao, int fator){// 20		
+		Mat saida = imagem.getMatriz().clone();
+		int saidaSize;
+		Size sizeEstrutura;
+		
+		if(orientacao == HORIZONTAL){
+			saidaSize = saida.cols() / fator;
+			sizeEstrutura = new Size(saidaSize, 1);
+		}else{
+			saidaSize = saida.rows() / fator;
+			sizeEstrutura = new Size(1, saidaSize);
+		}
+		
+		Mat horizontalStructure = Imgproc.getStructuringElement(Imgproc.MORPH_RECT, sizeEstrutura);
+		Imgproc.dilate(saida, saida, horizontalStructure, new Point(-1, -1), 1);
+	    Imgproc.erode(saida, saida, horizontalStructure, new Point(-1, -1), 1);
+	    
+	    return new Imagem(imagem.getNome() +"_fech"+orientacao, imagem.getFormato(), diretorioSaida, saida);
+	}
+	
+	/** Aplica operacao de dilatacao horizontal ou vertical na imagem **/
+	public Imagem morfoDilatacaoOrientacao(Imagem imagem, char orientacao, int fator){// 20		
+		Mat saida = imagem.getMatriz().clone();
+		int saidaSize;
+		Size sizeEstrutura;
+		
+		if(orientacao == HORIZONTAL){
+			saidaSize = saida.cols() / fator;
+			sizeEstrutura = new Size(saidaSize, 1);
+		}else{
+			saidaSize = saida.rows() / fator;
+			sizeEstrutura = new Size(1, saidaSize);
+		}
+		
+		Mat horizontalStructure = Imgproc.getStructuringElement(Imgproc.MORPH_RECT, sizeEstrutura);
+		Imgproc.dilate(saida, saida, horizontalStructure, new Point(-1, -1), 1);	    
+	    return new Imagem(imagem.getNome() +"_fech"+orientacao, imagem.getFormato(), diretorioSaida, saida);
+	}
+	
+	/** Aplica operacao de intersecao em duas imagens **/
+	public Imagem intersecao(Imagem imagem1, Imagem imagem2){	
+		Mat saida = new Mat(imagem1.getMatriz().width(), imagem1.getMatriz().height(), imagem1.getMatriz().type());
+		
+		Core.bitwise_and(imagem1.getMatriz(), imagem2.getMatriz(), saida);
+	    return new Imagem(imagem1.getNome() +"_inte", imagem1.getFormato(), diretorioSaida, saida);
 	}
 
 	/** Aplica Prewitt na imagem **/

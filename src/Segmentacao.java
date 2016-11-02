@@ -18,7 +18,7 @@ public class Segmentacao {
 
 	private String diretorioSaida;
 	private double margemCor = 20; //20
-	private double minimoCor = 500; //500
+	private double minimoCor = 400; //500
 
 	public Segmentacao(String diretorioSaida){
 		this.diretorioSaida = diretorioSaida;
@@ -125,16 +125,17 @@ public class Segmentacao {
 	    mMOP2f2 = new MatOfPoint2f();
 
 	    for(int i = 0; i < contours.size(); i++){
-	        if (contours.get(i).toList().size() > 100){ 
+	        if (contours.get(i).toList().size() > 200){ // 100 altearado
 	            contours.get(i).convertTo(mMOP2f1, CvType.CV_32FC2);
 	            mMOP2f2.convertTo(contours_poly.get(i), CvType.CV_32S);
 	            Imgproc.approxPolyDP(mMOP2f1, mMOP2f2, 10, true);
 
-	            if(contours_poly.get(i).toList().size() >= 4 && contours_poly.get(i).toList().size() <= 10){
+	            if(contours_poly.get(i).toList().size() >= 4 && contours_poly.get(i).toList().size() <= 20){
 	            	
-	            	Rect appRect = Imgproc.boundingRect(contours_poly.get(i));
-	            	double aspect = appRect.width / appRect.height;
-	            	if(aspect <= (2.66 + margemTamanho) && aspect >= (2 - margemTamanho)){
+	            	Rect appRect = Imgproc.boundingRect(contours_poly.get(i));	            		
+	            	
+	            	double razao = appRect.width / appRect.height;
+	            	if(razao <= (6 + margemTamanho) && razao >= (3 - margemTamanho)){
 	            		Rect roi = new Rect(appRect.x, appRect.y, appRect.width, appRect.height);
 		                Mat cropped = new Mat(imagemOriginal.getMatriz(), roi);
 		                
@@ -157,7 +158,7 @@ public class Segmentacao {
 		                
 		            	
 //		                regioesCandidatas.add(imgCandidata);
-	            	}	            	
+	            	}	
 	            }
 	        }   
 	    }
@@ -173,12 +174,16 @@ public class Segmentacao {
         		cor = imagem.get(row, col);
         		if(cor != null){
         			// Se for aproximadamente cinza
-        			if((cor[0] <= (cor[1]+margemCor) && cor[0] >= (cor[1]-margemCor) 
-        			&& cor[1] <= (cor[2]+margemCor) && cor[1] >= (cor[2]-margemCor)
-        			&& cor[0] <= (cor[2]+margemCor) && cor[0] >= (cor[2]-margemCor))
-        			&& (cor[0]+cor[1]+cor[2]) >= minimoCor){
+//        			if((cor[0] <= (cor[1]+margemCor) && cor[0] >= (cor[1]-margemCor) 
+//        			&& cor[1] <= (cor[2]+margemCor) && cor[1] >= (cor[2]-margemCor)
+//        			&& cor[0] <= (cor[2]+margemCor) && cor[0] >= (cor[2]-margemCor))
+//        			&& (cor[0]+cor[1]+cor[2]) >= minimoCor){
+//        				countGray++;
+//        			}
+        			
+        			if(cor[0] >= minimoCor){
         				countGray++;
-        			}
+                	}
         		}
 			}
 		}
@@ -194,10 +199,14 @@ public class Segmentacao {
         		cor = imagem.get(row, col);
         		if(cor != null){        			
         			// Se for aproximadamente preto
-        			if((cor[0] <= (cor[1]+margemCor) && cor[0] >= (cor[1]-margemCor) 
-                	&& cor[1] <= (cor[2]+margemCor) && cor[1] >= (cor[2]-margemCor)
-                	&& cor[0] <= (cor[2]+margemCor) && cor[0] >= (cor[2]-margemCor))
-                	&& (cor[0]+cor[1]+cor[2]) <= minimoCor){
+//        			if((cor[0] <= (cor[1]+margemCor) && cor[0] >= (cor[1]-margemCor) 
+//                	&& cor[1] <= (cor[2]+margemCor) && cor[1] >= (cor[2]-margemCor)
+//                	&& cor[0] <= (cor[2]+margemCor) && cor[0] >= (cor[2]-margemCor))
+//                	&& (cor[0]+cor[1]+cor[2]) < minimoCor){
+//        				countBlack++;
+//                	}
+        			
+        			if(cor[0] < minimoCor){
         				countBlack++;
                 	}
         		}
@@ -216,9 +225,9 @@ public class Segmentacao {
         			&& listaCandidatas.get(i).getQuantidadePixelsClaros() > max.getQuantidadePixelsClaros() 
         			&& listaCandidatas.get(i).getQuantidadePixelsEscuros() > max.getQuantidadePixelsEscuros())){
         		max = listaCandidatas.get(i);
-                System.out.println("Pixels claros para "+ listaCandidatas.get(i).getNome()+": "+listaCandidatas.get(i).getQuantidadePixelsClaros());
-                System.out.println("Pixels escuros para "+ listaCandidatas.get(i).getNome()+": "+listaCandidatas.get(i).getQuantidadePixelsEscuros());
-                System.out.println();
+//                System.out.println("Pixels claros para "+ listaCandidatas.get(i).getNome()+": "+listaCandidatas.get(i).getQuantidadePixelsClaros());
+//                System.out.println("Pixels escuros para "+ listaCandidatas.get(i).getNome()+": "+listaCandidatas.get(i).getQuantidadePixelsEscuros());
+//                System.out.println();
         	}
 		}
 		return max;

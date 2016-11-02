@@ -1,7 +1,6 @@
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.Date;
 
 import javax.activation.MimetypesFileTypeMap;
@@ -9,44 +8,15 @@ import javax.activation.MimetypesFileTypeMap;
 import org.opencv.core.Core;
 import org.opencv.core.Mat;
 import org.opencv.imgcodecs.Imgcodecs;
-import org.opencv.imgproc.Imgproc;
 
-// tutorial http://www.w3ii.com/pt/java_dip/default.html
-
-/*
-http://stackoverflow.com/questions/37302098/image-preprocessing-with-opencv-before-doing-character-recognition-tesseract
-1. Convert to Grayscale.
-2. Gaussian Blur with 3x3 or 5x5 filter.
-3. Apply Sobel Filter to find vertical edges.
-	Sobel(gray, dst, -1, 1, 0)
-4. Threshold the resultant image to get a binary image.
-5. Apply a morphological close operation using suitable structuring element.
-6. Find contours of the resulting image.
-7. Find minAreaRect of each contour. Select rectangles based on aspect ratio and minimum and maximum area.
-8. For each selected contour, find edge density. Set a threshold for edge density and choose the rectangles breaching that threshold as possible plate regions.
-9. Few rectangles will remain after this. You can filter them based on orientation or any criteria you deem suitable.
-10. Clip these detected rectangular portions from the image after adaptiveThreshold and apply OCR.
-*/
-
-/*
-http://stackoverflow.com/questions/20276209/find-the-plate-rectangle-in-a-given-picture
-1. You will want to perform a smooth/blur of some kind before thresholding the image, in order to eliminate unwanted noise;
-2. Apply threshold to the image like you are doing now;
-3. Use the openCv library's dilate function to slightly dilate your detected edges. This is useful because once the license 
-   plate's characters are dilated, they will sort of fill the rectangle in which they are contained;
-4. openCV has a function called cvRectangle that searches for rectanglular shapes in the image. There's plenty of documenation 
-   online to assist you in using it;
-5. Finally, you'll want to filter the rectangular shapes found that are license plate candidates based on ratio (width / height) 
-   and area (width * height). For example, portuguese license plates, at least in my test images, had a ratio between 2 and 3.5 
-   and an area of around 5000-7000 pixels. Obviously this depends on the license plate's shape, the image size, etc..
-*/
-
+// documentacao http://www.w3ii.com/pt/java_dip/default.html
+// Referencia http://wiki.ifba.edu.br/ads/tiki-download_file.php?fileId=827
 public class Main {
 	
 	private static final String DIRECT_PROJECT = System.getProperty("user.dir");
-	private static final String DIRECT_ENTRADA = DIRECT_PROJECT +"\\entrada";
-	private static final String DIRECT_PREPROCESSAMENTO = DIRECT_PROJECT +"\\preprocessamento";
-	private static final String DIRECT_SEGMENTACAO = DIRECT_PROJECT +"\\segmentacao";
+	private static final String DIRECT_ENTRADA = DIRECT_PROJECT +"/entrada3";
+	private static final String DIRECT_PREPROCESSAMENTO = DIRECT_PROJECT +"/preprocessamento";
+	private static final String DIRECT_SEGMENTACAO = DIRECT_PROJECT +"/segmentacao";
 	
 	static{
 		// Carrega OPENCV 3.1
@@ -82,7 +52,6 @@ public class Main {
 			
 			System.out.println("Carregando imagens de entrada."); 
 			ArrayList<Imagem> listaImagensEntrada = getListaImagens(DIRECT_ENTRADA, 50);
-//			Collections.shuffle(listaImagensEntrada);
 			
 			dateFim = new Date();
 			dateFim.setTime(dateFim.getTime()-dateIni.getTime());
@@ -95,44 +64,49 @@ public class Main {
 			
 			// PRE-PROCESSAMENTO
 			Imagem imgTemp;
+			Imagem imgTemp1;
+			Imagem imgTemp2;
 			ArrayList<Imagem> regioesCandidatas;
+			int proc = 0;
 			for (Imagem imagem : listaImagensEntrada) {			
 				
-//        Gaussiano, tons de cinza, binarizar, dilatacao e erosao, canny
-//        cvSmooth(orgImg,orgImg,CV_GAUSSIAN,7);
-//        cvCvtColor(orgImg,grayImg,CV_BGR2GRAY);
-//        cvThreshold(grayImg,grayImg,230,255,CV_THRESH_BINARY_INV);  
-//        cvErode(grayImg,grayImg,null,3);
-//        cvDilate(grayImg,grayImg,null,2);
+				// MELHOR (185 de 383) (32 de 50)
+				imgTemp = pp.paraTonsDeCinza(imagem);
+				imgTemp = pp.normalizar(imgTemp);
+				imgTemp = pp.filtroNitidez(imgTemp, 7, 0.75, -0.5, 0);
+				imgTemp = pp.filtroGaussiano(imgTemp, 3, -3);
+				imgTemp = pp.normalizar(imgTemp);
+				imgTemp = pp.filtroAutoCanny(imgTemp, 0);
+				imgTemp1 = pp.morfoFechamentoOrientacao(imgTemp, PreProcessamento.HORIZONTAL, 30);
+				imgTemp2 = pp.morfoFechamentoOrientacao(imgTemp, PreProcessamento.VERTICAL, 30);
+				imgTemp = pp.intersecao(imgTemp1, imgTemp2);
+				imgTemp = pp.morfoErosao(imgTemp, 3);
+				imgTemp = pp.morfoDilatacaoOrientacao(imgTemp, PreProcessamento.HORIZONTAL, 30);
+				imgTemp = pp.morfoDilatacao(imgTemp, 9);
 				
 				// SEGUNDA OPCAO
-//				imgTemp = pp.filtroGaussiano(imagem, 7, 0);	
-//				imgTemp = pp.paraTonsDeCinza(imgTemp);
-//				imgTemp = pp.filtroLaplaciano(imgTemp, PreProcessamento.NEGATIVA);
-//				imgTemp = pp.paraPretoEBrancoOTSU(imgTemp);
-//				imgTemp = pp.morfoErosao(imgTemp, 3);
-//				imgTemp = pp.morfoDilatacao(imgTemp, 2);
-//				imgTemp = pp.morfoFechamento(imgTemp, 27, 3);
+//				imgTemp = pp.paraTonsDeCinza(imagem);
+//				imgTemp = pp.normalizar(imgTemp);
+//				imgTemp = pp.filtroGaussiano(imagem, 3, 0);	
 //				imgTemp = pp.filtroAutoCanny(imgTemp, 0);
-				
-				// MELHOR
-				imgTemp = pp.paraTonsDeCinza(imagem);
-				imgTemp = pp.normalizar(imgTemp);			
-				imgTemp = pp.filtroGaussiano(imagem, 3, 0);	
-				imgTemp = pp.filtroAutoCanny(imgTemp, 0);
 				
 				imgTemp.gravar();
 
-				regioesCandidatas = s.getRegioesCandidatas3(imagem, imgTemp, 0.5);
-				imgTemp = s.getPlaca(regioesCandidatas);
-				if(imgTemp == null){
-					System.err.println(imagem.getNome() +" é difícil");
-				}else{
-					imgTemp.gravar();
+				regioesCandidatas = s.getRegioesCandidatas3(imagem, imgTemp, 0.25);
+				for (Imagem candidata : regioesCandidatas) {
+					candidata.gravar();
 				}
-//				for (Imagem candidata : regioesCandidatas) {
-//					candidata.gravar();
+				
+//				imgTemp = s.getPlaca(regioesCandidatas);
+//				if(imgTemp == null){
+//					System.err.println(imagem.getNome() +" eh dificil");
+//				}else{
+//					imgTemp.gravar();
 //				}
+				
+				if(proc++ % 50 == 0){
+					System.out.println("Imagens processadas: "+proc);
+				}
 			}
 			
 			dateFim = new Date();
