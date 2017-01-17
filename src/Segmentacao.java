@@ -54,6 +54,7 @@ public class Segmentacao {
 	                Mat cropped = new Mat(imagemOriginal.getMatriz(), roi);
 
 	                Imgproc.drawContours(imagemOriginal.getMatriz(), contours_poly, i, new Scalar(255, 0, 255));
+	                //imagemOriginal.gravar();
 	                regioesCandidatas.add(new Imagem(imagemOriginal.getNome() +"_cand_"+i, imagemOriginal.getFormato(), diretorioSaida, cropped));
 	            }
 	        }   
@@ -125,12 +126,12 @@ public class Segmentacao {
 	    mMOP2f2 = new MatOfPoint2f();
 
 	    for(int i = 0; i < contours.size(); i++){
-	        if (contours.get(i).toList().size() > 200){ // 100 altearado
+	        if (contours.get(i).toList().size() > 50){ // 100 alterado
 	            contours.get(i).convertTo(mMOP2f1, CvType.CV_32FC2);
 	            mMOP2f2.convertTo(contours_poly.get(i), CvType.CV_32S);
-	            Imgproc.approxPolyDP(mMOP2f1, mMOP2f2, 10, true);
+	            Imgproc.approxPolyDP(mMOP2f1, mMOP2f2, 8, true);
 
-	            if(contours_poly.get(i).toList().size() >= 4 && contours_poly.get(i).toList().size() <= 20){
+	            if(contours_poly.get(i).toList().size() >= 4 && contours_poly.get(i).toList().size() <= 20){//20
 	            	
 	            	Rect appRect = Imgproc.boundingRect(contours_poly.get(i));	            		
 	            	
@@ -139,6 +140,9 @@ public class Segmentacao {
 	            		Rect roi = new Rect(appRect.x, appRect.y, appRect.width, appRect.height);
 		                Mat cropped = new Mat(imagemOriginal.getMatriz(), roi);
 		                
+		                if(cropped.width() <= 50){
+		                	continue;
+		                }
 //		                Imgproc.drawContours(imagemOriginal.getMatriz(), contours_poly, i, new Scalar(255, 0, 255));
 		                Imagem imgCandidata = new Imagem(imagemOriginal.getNome() +"_cand_"+i, imagemOriginal.getFormato(), diretorioSaida, cropped);
 		                

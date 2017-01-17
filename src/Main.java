@@ -14,7 +14,7 @@ import org.opencv.imgcodecs.Imgcodecs;
 public class Main {
 	
 	private static final String DIRECT_PROJECT = System.getProperty("user.dir");
-	private static final String DIRECT_ENTRADA = DIRECT_PROJECT +"/entrada3";
+	private static final String DIRECT_ENTRADA = DIRECT_PROJECT +"/entrada";
 	private static final String DIRECT_PREPROCESSAMENTO = DIRECT_PROJECT +"/preprocessamento";
 	private static final String DIRECT_SEGMENTACAO = DIRECT_PROJECT +"/segmentacao";
 	
@@ -70,29 +70,31 @@ public class Main {
 			int proc = 0;
 			for (Imagem imagem : listaImagensEntrada) {			
 				
-				// MELHOR (185 de 383) (32 de 50)
-				imgTemp = pp.paraTonsDeCinza(imagem);
-				imgTemp = pp.normalizar(imgTemp);
-				imgTemp = pp.filtroNitidez(imgTemp, 7, 0.75, -0.5, 0);
-				imgTemp = pp.filtroGaussiano(imgTemp, 3, -3);
-				imgTemp = pp.normalizar(imgTemp);
-				imgTemp = pp.filtroAutoCanny(imgTemp, 0);
-				imgTemp1 = pp.morfoFechamentoOrientacao(imgTemp, PreProcessamento.HORIZONTAL, 30);
-				imgTemp2 = pp.morfoFechamentoOrientacao(imgTemp, PreProcessamento.VERTICAL, 30);
-				imgTemp = pp.intersecao(imgTemp1, imgTemp2);
-				imgTemp = pp.morfoErosao(imgTemp, 3);
-				imgTemp = pp.morfoDilatacaoOrientacao(imgTemp, PreProcessamento.HORIZONTAL, 30);
-				imgTemp = pp.morfoDilatacao(imgTemp, 9);
-				
-				// SEGUNDA OPCAO
+				// (185 de 383) (32 de 50)
 //				imgTemp = pp.paraTonsDeCinza(imagem);
 //				imgTemp = pp.normalizar(imgTemp);
-//				imgTemp = pp.filtroGaussiano(imagem, 3, 0);	
+//				imgTemp = pp.filtroNitidez(imgTemp, 7, 0.75, -0.5, 0);
+//				imgTemp = pp.filtroGaussiano(imgTemp, 3, -3);
+//				imgTemp = pp.normalizar(imgTemp);
 //				imgTemp = pp.filtroAutoCanny(imgTemp, 0);
+//				imgTemp1 = pp.morfoFechamentoOrientacao(imgTemp, PreProcessamento.HORIZONTAL, 30);
+//				imgTemp2 = pp.morfoFechamentoOrientacao(imgTemp, PreProcessamento.VERTICAL, 30);
+//				imgTemp = pp.intersecao(imgTemp1, imgTemp2);
+//				imgTemp = pp.morfoErosao(imgTemp, 3);
+//				imgTemp = pp.morfoDilatacaoOrientacao(imgTemp, PreProcessamento.HORIZONTAL, 30);
+//				imgTemp = pp.morfoDilatacao(imgTemp, 9);
+				
+				
+				// MELHOR (37 de 50)
+				imgTemp = MainTeste.clearAlgorithm(imagem, pp);
+				
+				if(imgTemp == null){
+					continue;
+				}
 				
 				imgTemp.gravar();
 
-				regioesCandidatas = s.getRegioesCandidatas3(imagem, imgTemp, 0.25);
+				regioesCandidatas = s.getRegioesCandidatas3(imagem, imgTemp, 2);//0.25
 				for (Imagem candidata : regioesCandidatas) {
 					candidata.gravar();
 				}
