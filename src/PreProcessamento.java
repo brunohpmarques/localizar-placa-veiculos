@@ -5,7 +5,10 @@ import org.opencv.core.MatOfDouble;
 import org.opencv.core.Point;
 import org.opencv.core.Size;
 import org.opencv.imgproc.Imgproc;
-
+/**
+ * @author Bruno Marques
+ * @author Danny Queiroz
+ */
 public class PreProcessamento {
 	public static final char HORIZONTAL = 'H';
 	public static final char VERTICAL = 'V';

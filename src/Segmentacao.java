@@ -1,10 +1,13 @@
 import java.util.ArrayList;
 import java.util.List;
 import java.util.ListIterator;
+import java.util.Vector;
 
 import org.opencv.core.Core;
 import org.opencv.core.CvType;
 import org.opencv.core.Mat;
+import org.opencv.core.MatOfFloat;
+import org.opencv.core.MatOfInt;
 import org.opencv.core.MatOfPoint;
 import org.opencv.core.MatOfPoint2f;
 import org.opencv.core.Point;
@@ -18,7 +21,7 @@ public class Segmentacao {
 
 	private String diretorioSaida;
 	private double margemCor = 20; //20
-	private double minimoCor = 400; //500
+	private double minimoCor = 128; //500
 
 	public Segmentacao(String diretorioSaida){
 		this.diretorioSaida = diretorioSaida;
@@ -26,7 +29,7 @@ public class Segmentacao {
 
 	public ArrayList<Imagem> getRegioesCandidatas(Imagem imagemOriginal, Imagem processada, int largura){
 		ArrayList<Imagem> regioesCandidatas = new ArrayList<Imagem>();
-    List<MatOfPoint> contours = new ArrayList<MatOfPoint>();
+		List<MatOfPoint> contours = new ArrayList<MatOfPoint>();
 	    Mat hierarchy = new Mat();
 	    Mat saida = processada.getMatriz().clone();
 	    Imgproc.findContours(processada.getMatriz(), contours, hierarchy, 0, 1);
@@ -113,7 +116,7 @@ public class Segmentacao {
 	}
 
 	// teste 3
-	public ArrayList<Imagem> getRegioesCandidatas3(Imagem imagemOriginal, Imagem processada, double margemTamanho){
+	public ArrayList<Imagem> getRegioesCandidatas3(PreProcessamento pp, Imagem imagemOriginal, Imagem processada, double margemTamanho){
 		ArrayList<Imagem> regioesCandidatas = new ArrayList<Imagem>();
 		List<MatOfPoint> contours = new ArrayList<MatOfPoint>();
 	    Mat hierarchy = new Mat();
@@ -147,21 +150,24 @@ public class Segmentacao {
 		                Imagem imgCandidata = new Imagem(imagemOriginal.getNome() +"_cand_"+i, imagemOriginal.getFormato(), diretorioSaida, cropped);
 		                
 		                
-		                //////////////////////////////////////////
-		                //Core.countNonZero(cropped);
-
+		                //////////////////////////////////////////		                
+		                imgCandidata = pp.paraTonsDeCinza(imgCandidata);
+		                imgCandidata = pp.paraPretoEBrancoOTSU(imgCandidata);
+		                
+//		                getHistograma(imgCandidata);
+		                
+		                imgCandidata.setCaminho(diretorioSaida);
 		                float count = getQuantidadePixelsClaros(cropped);
+		                System.out.println(count);
 		                imgCandidata.setQuantidadePixelsClaros(count);
-		                
 		                count = getQuantidadePixelsEscuros(cropped);
+		                System.out.println(count);
 		                imgCandidata.setQuantidadePixelsEscuros(count);
-
-		                regioesCandidatas.add(imgCandidata);
-		                
+		                System.out.println("\n");
 		                //////////////////////////////////////////
 		                
 		            	
-//		                regioesCandidatas.add(imgCandidata);
+		                regioesCandidatas.add(imgCandidata);
 	            	}	
 	            }
 	        }   
@@ -220,14 +226,36 @@ public class Segmentacao {
 		return (countBlack / (imagem.width()*imagem.height()));
 	}
 	
+	private int[] getHistograma(Imagem img) {
+		int histograma[] = new int[256];
+	    Vector<Mat> bgr_planes = new Vector<>();
+	    Core.split(img.getMatriz(), bgr_planes);
+	    
+	    MatOfInt histSize = new MatOfInt(256);
+	    MatOfFloat histRange = new MatOfFloat(0f, 256f);
+	    Mat b_hist = new  Mat();
+	    Imgproc.calcHist(bgr_planes, new MatOfInt(0), new Mat(), b_hist, histSize, histRange, false);
+	    
+	    for (int j = 0; j < b_hist.height(); j++) {
+	    	histograma[j] = (int)Math.round(b_hist.get(j, 0)[0]);
+	    	System.out.println(histograma[j]);
+		}
+	    System.out.println("\n");
+	    
+	    return histograma;
+	}
+
+	
 	// escolher candidata
-	public Imagem getPlaca(ArrayList<Imagem> listaCandidatas){       
-        Imagem max = null;
-        for (int i=0; i<listaCandidatas.size(); i++) {
-        	if(max == null 
-        	|| (listaCandidatas.get(i).getQuantidadePixelsClaros() > listaCandidatas.get(i).getQuantidadePixelsEscuros()
+	public Imagem getPlaca(ArrayList<Imagem> listaCandidatas){   
+		if(listaCandidatas == null || listaCandidatas.isEmpty()){
+			return null;
+		}
+        Imagem max = listaCandidatas.get(0);
+        for (int i=1; i<listaCandidatas.size(); i++) {
+        	if(listaCandidatas.get(i).getQuantidadePixelsClaros() > listaCandidatas.get(i).getQuantidadePixelsEscuros()
         			&& listaCandidatas.get(i).getQuantidadePixelsClaros() > max.getQuantidadePixelsClaros() 
-        			&& listaCandidatas.get(i).getQuantidadePixelsEscuros() > max.getQuantidadePixelsEscuros())){
+        			&& listaCandidatas.get(i).getQuantidadePixelsEscuros() > max.getQuantidadePixelsEscuros()){
         		max = listaCandidatas.get(i);
 //                System.out.println("Pixels claros para "+ listaCandidatas.get(i).getNome()+": "+listaCandidatas.get(i).getQuantidadePixelsClaros());
 //                System.out.println("Pixels escuros para "+ listaCandidatas.get(i).getNome()+": "+listaCandidatas.get(i).getQuantidadePixelsEscuros());

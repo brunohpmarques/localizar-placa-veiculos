@@ -38,7 +38,7 @@ public class Main {
 		if(!fs.exists()){
 			fs.mkdirs();
 		}else{
-			fs.delete();
+//			fs.delete();
 			fs.mkdirs();
 		}
 	}
@@ -51,7 +51,7 @@ public class Main {
 		try{
 			
 			System.out.println("Carregando imagens de entrada."); 
-			ArrayList<Imagem> listaImagensEntrada = getListaImagens(DIRECT_ENTRADA, 50);
+			ArrayList<Imagem> listaImagensEntrada = getListaImagens(DIRECT_ENTRADA, 10);
 			
 			dateFim = new Date();
 			dateFim.setTime(dateFim.getTime()-dateIni.getTime());
@@ -69,24 +69,8 @@ public class Main {
 			ArrayList<Imagem> regioesCandidatas;
 			int proc = 0;
 			for (Imagem imagem : listaImagensEntrada) {			
-				
-				// (185 de 383) (32 de 50)
-//				imgTemp = pp.paraTonsDeCinza(imagem);
-//				imgTemp = pp.normalizar(imgTemp);
-//				imgTemp = pp.filtroNitidez(imgTemp, 7, 0.75, -0.5, 0);
-//				imgTemp = pp.filtroGaussiano(imgTemp, 3, -3);
-//				imgTemp = pp.normalizar(imgTemp);
-//				imgTemp = pp.filtroAutoCanny(imgTemp, 0);
-//				imgTemp1 = pp.morfoFechamentoOrientacao(imgTemp, PreProcessamento.HORIZONTAL, 30);
-//				imgTemp2 = pp.morfoFechamentoOrientacao(imgTemp, PreProcessamento.VERTICAL, 30);
-//				imgTemp = pp.intersecao(imgTemp1, imgTemp2);
-//				imgTemp = pp.morfoErosao(imgTemp, 3);
-//				imgTemp = pp.morfoDilatacaoOrientacao(imgTemp, PreProcessamento.HORIZONTAL, 30);
-//				imgTemp = pp.morfoDilatacao(imgTemp, 9);
-				
-				
-				// MELHOR (37 de 50)
-				imgTemp = MainTeste.clearAlgorithm(imagem, pp);
+
+				imgTemp = AlgoritmosPreProc.clear(imagem, pp);
 				
 				if(imgTemp == null){
 					continue;
@@ -94,17 +78,17 @@ public class Main {
 				
 				imgTemp.gravar();
 
-				regioesCandidatas = s.getRegioesCandidatas3(imagem, imgTemp, 2);//0.25
-				for (Imagem candidata : regioesCandidatas) {
-					candidata.gravar();
-				}
-				
-//				imgTemp = s.getPlaca(regioesCandidatas);
-//				if(imgTemp == null){
-//					System.err.println(imagem.getNome() +" eh dificil");
-//				}else{
-//					imgTemp.gravar();
+				regioesCandidatas = s.getRegioesCandidatas3(pp, imagem, imgTemp, 2);//0.25
+//				for (Imagem candidata : regioesCandidatas) {
+//					candidata.gravar();
 //				}
+				
+				imgTemp = s.getPlaca(regioesCandidatas);
+				if(imgTemp == null){
+					System.err.println(imagem.getNome() +" eh dificil");
+				}else{
+					imgTemp.gravar();
+				}
 				
 				if(proc++ % 50 == 0){
 					System.out.println("Imagens processadas: "+proc);
