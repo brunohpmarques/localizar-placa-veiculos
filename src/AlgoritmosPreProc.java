@@ -1,5 +1,8 @@
 import org.opencv.core.Core;
 
+import model.Imagem;
+import model.PreProcessamento;
+
 // outro metodo: https://repositorio.ufba.br/ri/bitstream/ri/20966/1/mono_tiagoaraujo_bsi_2016.1%5BLAPV%5D.pdf		
 public class AlgoritmosPreProc {
 	

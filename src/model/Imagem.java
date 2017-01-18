@@ -1,3 +1,4 @@
+package model;
 import org.opencv.core.Mat;
 import org.opencv.imgcodecs.Imgcodecs;
 
@@ -8,6 +9,13 @@ public class Imagem {
 	private Mat matriz;
 	private float quantidadePixelsClaros;
 	private float quantidadePixelsEscuros;
+	private int[] histograma;
+	private double distancia;
+	
+	public Imagem(String nome, int[] histograma){
+		this.nome = nome;
+		this.histograma = histograma;
+	}
 
 	public Imagem(String nome, String formato, String caminho, Mat matriz) {
 		this.nome = nome;
@@ -76,6 +84,22 @@ public class Imagem {
 	public Imagem gravar(){
 		Imgcodecs.imwrite(caminho +"\\"+ nome + formato, matriz);
 		return this;
+	}
+
+	public int[] getHistograma() {
+		return histograma;
+	}
+
+	public void setHistograma(int[] histograma) {
+		this.histograma = histograma;
+	}
+
+	public double getDistancia() {
+		return distancia;
+	}
+
+	public void setDistancia(double distancia) {
+		this.distancia = distancia;
 	}
 	
 }

@@ -9,6 +9,11 @@ import org.opencv.core.Core;
 import org.opencv.core.Mat;
 import org.opencv.imgcodecs.Imgcodecs;
 
+import ia.KNN;
+import model.Imagem;
+import model.PreProcessamento;
+import model.Segmentacao;
+
 // documentacao http://www.w3ii.com/pt/java_dip/default.html
 // Referencia http://wiki.ifba.edu.br/ads/tiki-download_file.php?fileId=827
 public class Main {
@@ -43,7 +48,8 @@ public class Main {
 		}
 	}
 	
-	public static void main(String[] args) { 
+	public static void main(String[] args) {
+		/*
 		Date dateIni = new Date();
 		Date dateTemp;
 		Date dateFim;
@@ -108,6 +114,9 @@ public class Main {
 		System.out.println("\nTERMINOU AS: "+ dateFim.toString());
 		dateFim.setTime(dateFim.getTime()-dateIni.getTime());
 		System.out.println("DURACAO: "+ dateFim.getTime()/1000 +" SEGUNDOS");
+		*/
+		
+		KNN.run(null);
 	}
 	
 	/** Instancia lista com todas as imagens de um diretorio **/

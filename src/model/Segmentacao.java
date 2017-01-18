@@ -1,3 +1,4 @@
+package model;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.ListIterator;
@@ -154,7 +155,7 @@ public class Segmentacao {
 		                imgCandidata = pp.paraTonsDeCinza(imgCandidata);
 		                imgCandidata = pp.paraPretoEBrancoOTSU(imgCandidata);
 		                
-//		                getHistograma(imgCandidata);
+//		                PreProcessamento.getHistograma(imgCandidata);
 		                
 		                imgCandidata.setCaminho(diretorioSaida);
 		                float count = getQuantidadePixelsClaros(cropped);
@@ -225,26 +226,6 @@ public class Segmentacao {
         //Numero de pixels escuros do segmento / Numero de pixels do segmento
 		return (countBlack / (imagem.width()*imagem.height()));
 	}
-	
-	private int[] getHistograma(Imagem img) {
-		int histograma[] = new int[256];
-	    Vector<Mat> bgr_planes = new Vector<>();
-	    Core.split(img.getMatriz(), bgr_planes);
-	    
-	    MatOfInt histSize = new MatOfInt(256);
-	    MatOfFloat histRange = new MatOfFloat(0f, 256f);
-	    Mat b_hist = new  Mat();
-	    Imgproc.calcHist(bgr_planes, new MatOfInt(0), new Mat(), b_hist, histSize, histRange, false);
-	    
-	    for (int j = 0; j < b_hist.height(); j++) {
-	    	histograma[j] = (int)Math.round(b_hist.get(j, 0)[0]);
-	    	System.out.println(histograma[j]);
-		}
-	    System.out.println("\n");
-	    
-	    return histograma;
-	}
-
 	
 	// escolher candidata
 	public Imagem getPlaca(ArrayList<Imagem> listaCandidatas){   

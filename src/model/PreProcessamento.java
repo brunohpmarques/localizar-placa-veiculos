@@ -1,7 +1,12 @@
+package model;
+import java.util.Vector;
+
 import org.opencv.core.Core;
 import org.opencv.core.CvType;
 import org.opencv.core.Mat;
 import org.opencv.core.MatOfDouble;
+import org.opencv.core.MatOfFloat;
+import org.opencv.core.MatOfInt;
 import org.opencv.core.Point;
 import org.opencv.core.Size;
 import org.opencv.imgproc.Imgproc;
@@ -375,6 +380,26 @@ public class PreProcessamento {
 
 		Imgproc.filter2D(imagem.getMatriz(), saida, -1, mask);
 		return new Imagem(imagem.getNome() +"_lapl"+valor, imagem.getFormato(), diretorioSaida, saida);
+	}
+	
+	/** Retorna array do histograma de uma imagem **/
+	public static int[] getHistograma(Imagem img) {
+		int histograma[] = new int[256];
+	    Vector<Mat> bgr_planes = new Vector<>();
+	    Core.split(img.getMatriz(), bgr_planes);
+	    
+	    MatOfInt histSize = new MatOfInt(256);
+	    MatOfFloat histRange = new MatOfFloat(0f, 256f);
+	    Mat b_hist = new  Mat();
+	    Imgproc.calcHist(bgr_planes, new MatOfInt(0), new Mat(), b_hist, histSize, histRange, false);
+	    
+	    for (int j = 0; j < b_hist.height(); j++) {
+	    	histograma[j] = (int)Math.round(b_hist.get(j, 0)[0]);
+//	    	System.out.println(histograma[j]);
+		}
+//	    System.out.println("\n");
+	    
+	    return histograma;
 	}
 
 }
