@@ -150,30 +150,26 @@ public class Segmentacao {
 //		                Imgproc.drawContours(imagemOriginal.getMatriz(), contours_poly, i, new Scalar(255, 0, 255));
 		                Imagem imgCandidata = new Imagem(imagemOriginal.getNome() +"_cand_"+i, imagemOriginal.getFormato(), diretorioSaida, cropped);
 		                
-		                
 		                //////////////////////////////////////////		                
 		                imgCandidata = pp.paraTonsDeCinza(imgCandidata);
-		                imgCandidata = pp.paraPretoEBrancoOTSU(imgCandidata);
-		                
-//		                PreProcessamento.getHistograma(imgCandidata);
+		                imgCandidata.setHistograma(PreProcessamento.getHistograma(imgCandidata));
+//		                imgCandidata = pp.paraPretoEBrancoOTSU(imgCandidata);
 		                
 		                imgCandidata.setCaminho(diretorioSaida);
-		                float count = getQuantidadePixelsClaros(cropped);
-		                System.out.println(count);
-		                imgCandidata.setQuantidadePixelsClaros(count);
-		                count = getQuantidadePixelsEscuros(cropped);
-		                System.out.println(count);
-		                imgCandidata.setQuantidadePixelsEscuros(count);
-		                System.out.println("\n");
+//		                float count = getQuantidadePixelsClaros(cropped);
+//		                System.out.println(count);
+//		                imgCandidata.setQuantidadePixelsClaros(count);
+//		                count = getQuantidadePixelsEscuros(cropped);
+//		                System.out.println(count);
+//		                imgCandidata.setQuantidadePixelsEscuros(count);
+//		                System.out.println("\n");
 		                //////////////////////////////////////////
 		                
-		            	
 		                regioesCandidatas.add(imgCandidata);
 	            	}	
 	            }
 	        }   
 	    }
-	    
 	    return regioesCandidatas;
 	}
 	

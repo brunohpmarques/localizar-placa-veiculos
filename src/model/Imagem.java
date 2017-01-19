@@ -87,7 +87,7 @@ public class Imagem {
 	}
 
 	public int[] getHistograma() {
-		return histograma;
+		return this.histograma;
 	}
 
 	public void setHistograma(int[] histograma) {
@@ -101,5 +101,18 @@ public class Imagem {
 	public void setDistancia(double distancia) {
 		this.distancia = distancia;
 	}
+	
+	@Override
+    public boolean equals(Object o){
+        if (o instanceof Imagem){
+        	Imagem i = (Imagem) o;
+        	String n1 = i.getNome().split("_")[0];
+        	String n2 = this.nome.split("_")[1];
+        	if(n1.equalsIgnoreCase(n2)){
+        		return true;
+        	}
+        }
+        return false;
+    }
 	
 }

@@ -1,6 +1,7 @@
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Date;
 
 import javax.activation.MimetypesFileTypeMap;
@@ -46,10 +47,16 @@ public class Main {
 //			fs.delete();
 			fs.mkdirs();
 		}
+		
+//		try {
+//			KNN.Extractor.gerarHistogramaARFF("base");
+//		} catch (FileNotFoundException e) {
+//			e.printStackTrace();
+//		}
 	}
 	
 	public static void main(String[] args) {
-		/*
+		
 		Date dateIni = new Date();
 		Date dateTemp;
 		Date dateFim;
@@ -57,7 +64,9 @@ public class Main {
 		try{
 			
 			System.out.println("Carregando imagens de entrada."); 
-			ArrayList<Imagem> listaImagensEntrada = getListaImagens(DIRECT_ENTRADA, 10);
+			ArrayList<Imagem> listaImagensEntrada = getListaImagens(DIRECT_ENTRADA, 0);
+			Collections.shuffle(listaImagensEntrada);
+			listaImagensEntrada = new ArrayList<Imagem>(listaImagensEntrada.subList(0, 10));
 			
 			dateFim = new Date();
 			dateFim.setTime(dateFim.getTime()-dateIni.getTime());
@@ -89,14 +98,19 @@ public class Main {
 //					candidata.gravar();
 //				}
 				
-				imgTemp = s.getPlaca(regioesCandidatas);
+				// MANUAL
+//				imgTemp = s.getPlaca(regioesCandidatas);
+				
+				// KNN
+				imgTemp = KNN.run(listaImagensEntrada, regioesCandidatas);
+				
 				if(imgTemp == null){
 					System.err.println(imagem.getNome() +" eh dificil");
 				}else{
 					imgTemp.gravar();
 				}
 				
-				if(proc++ % 50 == 0){
+				if(++proc % 50 == 0){
 					System.out.println("Imagens processadas: "+proc);
 				}
 			}
@@ -110,13 +124,11 @@ public class Main {
 			e.printStackTrace();
 			System.out.println("Fim com erro.");
 		}
+		
 		dateFim = new Date();
 		System.out.println("\nTERMINOU AS: "+ dateFim.toString());
 		dateFim.setTime(dateFim.getTime()-dateIni.getTime());
 		System.out.println("DURACAO: "+ dateFim.getTime()/1000 +" SEGUNDOS");
-		*/
-		
-		KNN.run(null);
 	}
 	
 	/** Instancia lista com todas as imagens de um diretorio **/

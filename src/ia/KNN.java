@@ -8,6 +8,9 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Date;
+import java.util.HashMap;
 
 import javax.activation.MimetypesFileTypeMap;
 
@@ -21,19 +24,100 @@ public class KNN {
 	private static final String DIRECT_PROJECT = System.getProperty("user.dir");
 	private static final String diretorioBasePlacas = DIRECT_PROJECT+"/basePlacas";
 	private static final String ls = System.lineSeparator();
+	private static final int K = 5;
+	private static ArrayList<Imagem> basePlacas;
 	
-	public static void run(ArrayList<Imagem> listaImagens){
+	public static Imagem run(ArrayList<Imagem> imagensEntrada, ArrayList<Imagem> regioesCandidatas){
 		try {
-			Extractor.gerarHistogramaARFF("base");
-			ArrayList<Imagem> basePlacas = Extractor.lerHistogramaARFF("base");
-			System.out.println("Base de placas com "+basePlacas.size()+" histogramas");
-			
+			if(regioesCandidatas != null && !regioesCandidatas.isEmpty()){
+				
+				if(basePlacas == null || basePlacas.isEmpty()){
+					basePlacas = Extractor.lerHistogramaARFF("base");
+				}
+				System.out.println("Base de placas com "+basePlacas.size()+" histogramas carregada");
+				
+				Date dateIni = new Date();
+				Date dateFim;
+				System.out.println("CALCULANDO DISTANCIA AS: "+ dateIni.toString());
+				
+				ArrayList<Integer> vizinhos = new ArrayList<>();
+				int iMaior = 0;
+				for (int i = 0; i < basePlacas.size(); i++) {
+					if(!imagensEntrada.contains(basePlacas.get(i))){ // garante que nao vai comparar com a base de teste
+						
+						for (Imagem imagem : regioesCandidatas) {
+							imagem.setDistancia(Distancia.manhattan(imagem, basePlacas.get(i)));
+						}
+						
+						iMaior = 0;
+						for (int j = 1; j < regioesCandidatas.size(); j++) {
+							if(regioesCandidatas.get(j).getDistancia() > regioesCandidatas.get(iMaior).getDistancia()){
+								iMaior = j;
+							}
+						}
+						vizinhos.add(iMaior);
+						
+					}
+					if(++i % 50 == 0){
+						System.out.println(i +" calculados");
+					}
+				}
+				
+				for (int i = 0; i < vizinhos.size(); i++) {
+					System.out.println("------> "+vizinhos.get(i));
+				}
+							
+				HashMap<Integer, Integer> map = new HashMap<>();
+				for (int i = 0; i < vizinhos.size(); i++) {
+					if(map.containsKey(vizinhos.get(i))){
+						map.put(vizinhos.get(i), ((Integer)map.get(vizinhos.get(i)))+1);
+					}else{
+						map.put(vizinhos.get(i), 1);
+					}
+				}
+				
+				iMaior = Collections.max(map.entrySet(), (entry1, entry2) -> entry1.getValue() - entry2.getValue()).getKey();
+				
+				dateFim = new Date();
+				System.out.println("TERMINOU DE CALCULAR AS: "+ dateFim.toString());
+				dateFim.setTime(dateFim.getTime()-dateIni.getTime());
+				System.out.println("DURACAO: "+ dateFim.getTime()/1000 +" SEGUNDOS\n");
+				
+				return regioesCandidatas.get(iMaior);
+			}
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
+		
+		return null;
 	}
 	
-	static class Extractor{
+	
+	static class Distancia{
+		
+		public static double euclidiana(Imagem i1, Imagem i2){
+			double soma = 0.0;
+			int ih1[] = i1.getHistograma();
+			int ih2[] = i2.getHistograma();
+			for (int i = 0; i < ih1.length; i++) {
+				soma += Math.pow((ih1[i] - ih2[i]), 2);
+			}
+			return (double)Math.sqrt(soma);
+		}
+		
+		public static double manhattan(Imagem i1, Imagem i2){
+			int soma = 0;
+			int ih1[] = i1.getHistograma();
+			int ih2[] = i2.getHistograma();
+			for (int i = 0; i < ih1.length; i++) {
+				soma += Math.abs((ih1[i] - ih2[i]));
+			}
+			return soma;
+		}
+	}
+	
+	
+	public static class Extractor{
 		
 		private static String getFileExtension(File file) {
 		    String name = file.getName();
@@ -56,10 +140,15 @@ public class KNN {
 				throw new FileNotFoundException(diretorio);
 			}
 			ArrayList<Imagem> listaImagens = new ArrayList<>();
+			
+			Date dateIni = new Date();
+			Date dateFim;
+			System.out.println("LENDO IMAGENS DA BASE AS: "+ dateIni.toString());
 
 			String mimetype;
 	        String type;
 	        Mat matriz;
+	        int cont = 0;
 			for (File arquivo : arrayArquivos) {
 				if(!arquivo.isDirectory() && arquivo.canRead()){
 					mimetype = new MimetypesFileTypeMap().getContentType(arquivo);
@@ -71,7 +160,15 @@ public class KNN {
 						listaImagens.add(new Imagem(mimetype, type, arquivo.getAbsolutePath(), matriz));
 					}		
 				}
+				if(++cont % 50 == 0){
+					System.out.println(cont +" lidos");
+				}
 			}
+			
+			dateFim = new Date();
+			System.out.println("TERMINOU DE LER AS IMAGENS DA BASE AS: "+ dateFim.toString());
+			dateFim.setTime(dateFim.getTime()-dateIni.getTime());
+			System.out.println("DURACAO: "+ dateFim.getTime()/1000 +" SEGUNDOS\n");
 			return listaImagens;
 		}
 
@@ -105,13 +202,18 @@ public class KNN {
 		}
 		
 		public static ArrayList<Imagem> lerHistogramaARFF(String nomeArquivo) throws IOException{
+			Date dateIni = new Date();
+			Date dateFim;
+			System.out.println("LENDO BASE ARFF AS: "+ dateIni.toString());
+			
 			ArrayList<Imagem> lHist = new ArrayList<>();
 			File arquivo = new File(diretorioBasePlacas+"/"+nomeArquivo+".arff");
-			StringBuilder retorno = new StringBuilder();
 			BufferedReader conteudo = new BufferedReader(new FileReader(arquivo));
 			int offset = 266; // numero de linhas que nao importam
 			String arrays[];
 			int arrayi[];
+			
+			int cont = 0;
 		    while (conteudo.ready()) {
 		    	if(offset > 0){
 		    		offset--;
@@ -126,8 +228,19 @@ public class KNN {
 			    		arrayi[i] = Integer.parseInt(arrays[i]);
 					}
 			    	lHist.add(new Imagem(arrays[arrays.length-1], arrayi));
+		    	}else{
+		    		System.err.println("Linha "+ cont +" com tamanho "+ arrays.length +" "+arrays[0]);
+		    	}
+		    	
+		    	if(++cont %50 == 0){
+		    		System.out.println(cont +" lidos");
 		    	}
 		    }
+		    
+		    dateFim = new Date();
+			System.out.println("TERMINOU DE LER A BASE AS: "+ dateFim.toString());
+			dateFim.setTime(dateFim.getTime()-dateIni.getTime());
+			System.out.println("DURACAO: "+ dateFim.getTime()/1000 +" SEGUNDOS\n");
 		    return lHist;
 		}
 		
@@ -146,6 +259,4 @@ public class KNN {
 		
 	}
 	
-	
-
 }
