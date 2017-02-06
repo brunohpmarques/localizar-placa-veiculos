@@ -2,13 +2,16 @@ package model;
 import java.util.Vector;
 
 import org.opencv.core.Core;
+import org.opencv.core.Core.MinMaxLocResult;
 import org.opencv.core.CvType;
 import org.opencv.core.Mat;
 import org.opencv.core.MatOfDouble;
 import org.opencv.core.MatOfFloat;
 import org.opencv.core.MatOfInt;
 import org.opencv.core.Point;
+import org.opencv.core.Scalar;
 import org.opencv.core.Size;
+import org.opencv.core.TermCriteria;
 import org.opencv.imgproc.Imgproc;
 /**
  * @author Bruno Marques
@@ -402,4 +405,36 @@ public class PreProcessamento {
 	    return histograma;
 	}
 
+	/** Retorna a normal de uma imagem **/
+	public static double getNorm(Imagem img){
+		return Core.norm(img.getMatriz());
+	}
+	
+	/** Retorna a media de uma imagem (double[] Scalar.val) **/
+	public static Scalar getMean(Imagem img){
+		return Core.mean(img.getMatriz());
+	}
+	
+	/** Retorna a soma dos elementos de uma imagem (double[] Scalar.val) **/
+	public static Scalar getSum(Imagem img){
+		return Core.sumElems(img.getMatriz());
+	}
+	
+	/** Retorna a soma dos elementos da diagonal de uma imagem (double[] Scalar.val) **/
+	public static Scalar getTrace(Imagem img){
+		return Core.trace(img.getMatriz());
+	}
+	
+	/** Retorna a soma dos elementos da diagonal de uma imagem **/
+	public static double getKMeans(Imagem img, int k){
+		Mat out = img.getMatriz().clone();
+		Mat samples = out.reshape(1, out.cols() * out.rows());
+		Mat samples32f = new Mat();
+		samples.convertTo(samples32f, CvType.CV_32F, 1.0 / 255.0);
+		
+		Mat labels = new Mat();
+		TermCriteria criteria = new TermCriteria(TermCriteria.COUNT, Integer.parseInt(out.total()+""), 1);
+		Mat centers = new Mat();
+		return Core.kmeans(samples32f, k, labels, criteria, 1, Core.KMEANS_PP_CENTERS, centers);
+	}
 }

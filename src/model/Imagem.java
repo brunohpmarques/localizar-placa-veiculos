@@ -24,6 +24,19 @@ public class Imagem {
 		this.matriz = matriz;
 	}
 
+	public Imagem(String nome, String formato, String caminho, Mat matriz, float quantidadePixelsClaros,
+			float quantidadePixelsEscuros, int[] histograma, double distancia) {
+		super();
+		this.nome = nome;
+		this.formato = formato;
+		this.caminho = caminho;
+		this.matriz = matriz;
+		this.quantidadePixelsClaros = quantidadePixelsClaros;
+		this.quantidadePixelsEscuros = quantidadePixelsEscuros;
+		this.histograma = histograma;
+		this.distancia = distancia;
+	}
+
 	public String getNome() {
 		return nome;
 	}
@@ -100,6 +113,11 @@ public class Imagem {
 
 	public void setDistancia(double distancia) {
 		this.distancia = distancia;
+	}
+	
+	public Imagem clone(){
+		return new Imagem(nome, formato, caminho, matriz, quantidadePixelsClaros,
+				quantidadePixelsEscuros, histograma, distancia);
 	}
 	
 	@Override

@@ -5,6 +5,7 @@ import java.util.Collections;
 import java.util.Date;
 
 import javax.activation.MimetypesFileTypeMap;
+import javax.print.attribute.standard.NumberOfDocuments;
 
 import org.opencv.core.Core;
 import org.opencv.core.Mat;
@@ -44,7 +45,6 @@ public class Main {
 		if(!fs.exists()){
 			fs.mkdirs();
 		}else{
-//			fs.delete();
 			fs.mkdirs();
 		}
 		
@@ -65,12 +65,13 @@ public class Main {
 			
 			System.out.println("Carregando imagens de entrada."); 
 			ArrayList<Imagem> listaImagensEntrada = getListaImagens(DIRECT_ENTRADA, 0);
-			Collections.shuffle(listaImagensEntrada);
-			listaImagensEntrada = new ArrayList<Imagem>(listaImagensEntrada.subList(0, 10));
-			
 			dateFim = new Date();
 			dateFim.setTime(dateFim.getTime()-dateIni.getTime());
 			System.out.println(listaImagensEntrada.size() +" imagens de entrada carregadas em "+ (dateFim.getTime()/1000) +" segundos.\n");
+			
+			Collections.shuffle(listaImagensEntrada);
+			listaImagensEntrada = new ArrayList<Imagem>(listaImagensEntrada.subList(0, 10));
+			System.out.println(listaImagensEntrada.size() +" imagens separadas para teste");
 						
 			dateTemp = new Date();
 			System.out.println("Iniciando pre-processamento as "+ dateTemp.toString()); 
@@ -99,10 +100,10 @@ public class Main {
 //				}
 				
 				// MANUAL
-//				imgTemp = s.getPlaca(regioesCandidatas);
+				imgTemp = s.getPlaca(regioesCandidatas);
 				
 				// KNN
-				imgTemp = KNN.run(listaImagensEntrada, regioesCandidatas);
+//				imgTemp = KNN.run(listaImagensEntrada, regioesCandidatas);
 				
 				if(imgTemp == null){
 					System.err.println(imagem.getNome() +" eh dificil");
@@ -143,6 +144,11 @@ public class Main {
 		if(arrayArquivos == null){
 			throw new FileNotFoundException(diretorio);
 		}
+		
+		if(arrayArquivos.length*0.66 < max){
+			throw new NumberFormatException("Numero maximo: "+((int)arrayArquivos.length*0.66));
+		}
+		
 		ArrayList<Imagem> listaImagens = new ArrayList<>();
 
 		String mimetype;

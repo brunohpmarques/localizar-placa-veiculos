@@ -150,6 +150,14 @@ public class Segmentacao {
 //		                Imgproc.drawContours(imagemOriginal.getMatriz(), contours_poly, i, new Scalar(255, 0, 255));
 		                Imagem imgCandidata = new Imagem(imagemOriginal.getNome() +"_cand_"+i, imagemOriginal.getFormato(), diretorioSaida, cropped);
 		                
+		                PreProcessamento.getNorm(imgCandidata);
+		                PreProcessamento.getMean(imgCandidata);
+		                PreProcessamento.getSum(imgCandidata);
+		                PreProcessamento.getTrace(imgCandidata);
+		                PreProcessamento.getKMeans(imgCandidata, 4);
+		                
+		                // TODO entropia, contraste ou variancia
+		                
 		                //////////////////////////////////////////		                
 		                imgCandidata = pp.paraTonsDeCinza(imgCandidata);
 		                imgCandidata.setHistograma(PreProcessamento.getHistograma(imgCandidata));

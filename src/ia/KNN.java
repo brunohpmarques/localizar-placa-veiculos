@@ -9,8 +9,11 @@ import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.List;
+import java.util.Map.Entry;
 
 import javax.activation.MimetypesFileTypeMap;
 
@@ -30,6 +33,7 @@ public class KNN {
 	public static Imagem run(ArrayList<Imagem> imagensEntrada, ArrayList<Imagem> regioesCandidatas){
 		try {
 			if(regioesCandidatas != null && !regioesCandidatas.isEmpty()){
+				System.out.println("------> "+regioesCandidatas.size());
 				
 				if(basePlacas == null || basePlacas.isEmpty()){
 					basePlacas = Extractor.lerHistogramaARFF("base");
@@ -40,50 +44,63 @@ public class KNN {
 				Date dateFim;
 				System.out.println("CALCULANDO DISTANCIA AS: "+ dateIni.toString());
 				
-				ArrayList<Integer> vizinhos = new ArrayList<>();
-				int iMaior = 0;
+				List<Imagem> vizinhos = new ArrayList<Imagem>();
+				Imagem iMaior = null;
+				int cont = 0;
 				for (int i = 0; i < basePlacas.size(); i++) {
 					if(!imagensEntrada.contains(basePlacas.get(i))){ // garante que nao vai comparar com a base de teste
 						
 						for (Imagem imagem : regioesCandidatas) {
-							imagem.setDistancia(Distancia.manhattan(imagem, basePlacas.get(i)));
+							imagem.setDistancia(Distancia.euclidiana(imagem, basePlacas.get(i)));
 						}
 						
-						iMaior = 0;
+						iMaior = regioesCandidatas.get(0);
 						for (int j = 1; j < regioesCandidatas.size(); j++) {
-							if(regioesCandidatas.get(j).getDistancia() > regioesCandidatas.get(iMaior).getDistancia()){
-								iMaior = j;
+							if(regioesCandidatas.get(j).getDistancia() > iMaior.getDistancia()){
+								iMaior = regioesCandidatas.get(j);
 							}
 						}
-						vizinhos.add(iMaior);
+						vizinhos.add(iMaior.clone());
 						
 					}
-					if(++i % 50 == 0){
+					if(++cont % 50 == 0){
 						System.out.println(i +" calculados");
 					}
 				}
 				
-				for (int i = 0; i < vizinhos.size(); i++) {
-					System.out.println("------> "+vizinhos.get(i));
-				}
-							
-				HashMap<Integer, Integer> map = new HashMap<>();
+				Collections.sort(vizinhos, new Comparator<Imagem>() {
+				        @Override
+				        public int compare(Imagem i1, Imagem i2){
+				        	if(i1.getDistancia() > i1.getDistancia()) return 1;
+				        	if(i1.getDistancia() < i1.getDistancia()) return -1;
+				        	return 0;
+				        }
+				    });
+				
+				vizinhos = vizinhos.subList(0, K-1);
+				
+				HashMap<Imagem, Integer> map = new HashMap<>();
 				for (int i = 0; i < vizinhos.size(); i++) {
 					if(map.containsKey(vizinhos.get(i))){
-						map.put(vizinhos.get(i), ((Integer)map.get(vizinhos.get(i)))+1);
+						map.put(vizinhos.get(i), map.get(vizinhos.get(i)) + 1);
 					}else{
 						map.put(vizinhos.get(i), 1);
 					}
 				}
 				
-				iMaior = Collections.max(map.entrySet(), (entry1, entry2) -> entry1.getValue() - entry2.getValue()).getKey();
+				int temp = -1;
+				for (Entry<Imagem, Integer> imagem : map.entrySet()) {
+					if(temp == -1 || imagem.getValue() > temp){
+						iMaior = imagem.getKey();
+					}
+				}
 				
 				dateFim = new Date();
 				System.out.println("TERMINOU DE CALCULAR AS: "+ dateFim.toString());
 				dateFim.setTime(dateFim.getTime()-dateIni.getTime());
 				System.out.println("DURACAO: "+ dateFim.getTime()/1000 +" SEGUNDOS\n");
 				
-				return regioesCandidatas.get(iMaior);
+				return iMaior;
 			}
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -92,8 +109,7 @@ public class KNN {
 		return null;
 	}
 	
-	
-	static class Distancia{
+	private static class Distancia{
 		
 		public static double euclidiana(Imagem i1, Imagem i2){
 			double soma = 0.0;
@@ -115,7 +131,6 @@ public class KNN {
 			return soma;
 		}
 	}
-	
 	
 	public static class Extractor{
 		
