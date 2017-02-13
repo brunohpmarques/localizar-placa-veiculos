@@ -147,32 +147,36 @@ public class Segmentacao {
 		                if(cropped.width() <= 50){
 		                	continue;
 		                }
-//		                Imgproc.drawContours(imagemOriginal.getMatriz(), contours_poly, i, new Scalar(255, 0, 255));
+//		                Imgproc.drawContours(cropped, contours_poly, i, new Scalar(255, 0, 255));
 		                Imagem imgCandidata = new Imagem(imagemOriginal.getNome() +"_cand_"+i, imagemOriginal.getFormato(), diretorioSaida, cropped);
 		                
-		                PreProcessamento.getNorm(imgCandidata);
-		                PreProcessamento.getMean(imgCandidata);
-		                PreProcessamento.getSum(imgCandidata);
-		                PreProcessamento.getTrace(imgCandidata);
-		                PreProcessamento.getKMeans(imgCandidata, 4);
 		                
+		                //////////////////////////////////////////
+		                // Segmentacao pelo KNN com vetor de caracteristicas estatisticas
+//		                PreProcessamento.getNorm(imgCandidata);
+//		                PreProcessamento.getMean(imgCandidata);
+//		                PreProcessamento.getSum(imgCandidata);
+//		                PreProcessamento.getTrace(imgCandidata);
+//		                PreProcessamento.getKMeans(imgCandidata, 4);
 		                // TODO entropia, contraste ou variancia
+		                //////////////////////////////////////////		
 		                
-		                //////////////////////////////////////////		                
+		                //////////////////////////////////////////
+		                // Segmentacao pelo KNN com vetor de caracteristicas usando histograma
 		                imgCandidata = pp.paraTonsDeCinza(imgCandidata);
-		                imgCandidata.setHistograma(PreProcessamento.getHistograma(imgCandidata));
+//		                imgCandidata.setHistograma(PreProcessamento.getHistograma(imgCandidata));
 //		                imgCandidata = pp.paraPretoEBrancoOTSU(imgCandidata);
-		                
-		                imgCandidata.setCaminho(diretorioSaida);
-//		                float count = getQuantidadePixelsClaros(cropped);
-//		                System.out.println(count);
-//		                imgCandidata.setQuantidadePixelsClaros(count);
-//		                count = getQuantidadePixelsEscuros(cropped);
-//		                System.out.println(count);
-//		                imgCandidata.setQuantidadePixelsEscuros(count);
-//		                System.out.println("\n");
 		                //////////////////////////////////////////
 		                
+		                //////////////////////////////////////////
+		                // Segmentacao pela conta de densidade de pixels claros e escuros
+		                float count = getQuantidadePixelsClaros(cropped);
+		                imgCandidata.setQuantidadePixelsClaros(count);
+		                count = getQuantidadePixelsEscuros(cropped);
+		                imgCandidata.setQuantidadePixelsEscuros(count);
+		                //////////////////////////////////////////
+		                
+		                imgCandidata.setCaminho(diretorioSaida);
 		                regioesCandidatas.add(imgCandidata);
 	            	}	
 	            }

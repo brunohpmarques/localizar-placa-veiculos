@@ -48,11 +48,6 @@ public class Main {
 			fs.mkdirs();
 		}
 		
-//		try {
-//			KNN.Extractor.gerarHistogramaARFF("base");
-//		} catch (FileNotFoundException e) {
-//			e.printStackTrace();
-//		}
 	}
 	
 	public static void main(String[] args) {
@@ -69,8 +64,8 @@ public class Main {
 			dateFim.setTime(dateFim.getTime()-dateIni.getTime());
 			System.out.println(listaImagensEntrada.size() +" imagens de entrada carregadas em "+ (dateFim.getTime()/1000) +" segundos.\n");
 			
-			Collections.shuffle(listaImagensEntrada);
-			listaImagensEntrada = new ArrayList<Imagem>(listaImagensEntrada.subList(0, 10));
+//			Collections.shuffle(listaImagensEntrada);
+//			listaImagensEntrada = new ArrayList<Imagem>(listaImagensEntrada.subList(0, 10));
 			System.out.println(listaImagensEntrada.size() +" imagens separadas para teste");
 						
 			dateTemp = new Date();
@@ -86,7 +81,8 @@ public class Main {
 			int proc = 0;
 			for (Imagem imagem : listaImagensEntrada) {			
 
-				imgTemp = AlgoritmosPreProc.clear(imagem, pp);
+				imgTemp = AlgoritmosPreProc.advanced(imagem, pp);
+//				imgTemp = AlgoritmosPreProc.Existentes.ufmgViniciusELucasEAparecido(imagem, pp);
 				
 				if(imgTemp == null){
 					continue;
