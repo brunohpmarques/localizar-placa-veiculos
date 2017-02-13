@@ -21,8 +21,8 @@ import org.opencv.imgproc.Imgproc;
 public class Segmentacao {
 
 	private String diretorioSaida;
-	private double margemCor = 20; //20
-	private double minimoCor = 128; //500
+	private static double margemCor = 20; //20
+	private static double minimoCor = 128; //500
 
 	public Segmentacao(String diretorioSaida){
 		this.diretorioSaida = diretorioSaida;
@@ -149,8 +149,7 @@ public class Segmentacao {
 		                }
 //		                Imgproc.drawContours(cropped, contours_poly, i, new Scalar(255, 0, 255));
 		                Imagem imgCandidata = new Imagem(imagemOriginal.getNome() +"_cand_"+i, imagemOriginal.getFormato(), diretorioSaida, cropped);
-		                
-		                
+		                		                
 		                //////////////////////////////////////////
 		                // Segmentacao pelo KNN com vetor de caracteristicas estatisticas
 //		                PreProcessamento.getNorm(imgCandidata);
@@ -163,7 +162,7 @@ public class Segmentacao {
 		                
 		                //////////////////////////////////////////
 		                // Segmentacao pelo KNN com vetor de caracteristicas usando histograma
-		                imgCandidata = pp.paraTonsDeCinza(imgCandidata);
+//		                imgCandidata = pp.paraTonsDeCinza(imgCandidata);
 //		                imgCandidata.setHistograma(PreProcessamento.getHistograma(imgCandidata));
 //		                imgCandidata = pp.paraPretoEBrancoOTSU(imgCandidata);
 		                //////////////////////////////////////////
@@ -185,7 +184,7 @@ public class Segmentacao {
 	    return regioesCandidatas;
 	}
 	
-	private float getQuantidadePixelsClaros(Mat imagem){
+	public static float getQuantidadePixelsClaros(Mat imagem){
 		double[] cor;
 		float countGray = 0;
 		for (int row = 0; row < imagem.width(); row++) {
@@ -210,7 +209,7 @@ public class Segmentacao {
 		return (countGray / (imagem.width()*imagem.height()));
 	}
 	
-	private float getQuantidadePixelsEscuros(Mat imagem){
+	public static float getQuantidadePixelsEscuros(Mat imagem){
 		double[] cor;
 		float countBlack = 0;
 		for (int row = 0; row < imagem.width(); row++) {

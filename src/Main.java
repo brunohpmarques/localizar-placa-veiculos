@@ -1,5 +1,6 @@
 import java.io.File;
 import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
@@ -21,7 +22,7 @@ import model.Segmentacao;
 public class Main {
 	
 	private static final String DIRECT_PROJECT = System.getProperty("user.dir");
-	private static final String DIRECT_ENTRADA = DIRECT_PROJECT +"/entrada";
+	private static final String DIRECT_ENTRADA = DIRECT_PROJECT +"/entrada5";
 	private static final String DIRECT_PREPROCESSAMENTO = DIRECT_PROJECT +"/preprocessamento";
 	private static final String DIRECT_SEGMENTACAO = DIRECT_PROJECT +"/segmentacao";
 	
@@ -50,6 +51,17 @@ public class Main {
 		
 	}
 	
+	
+	public static void main2(String[] args) {
+		try {
+			KNN.Extractor.gerarVetorARFF("baseVetor");
+			ArrayList<Imagem> al = KNN.Extractor.lerVetorARFF("baseVetor");
+			System.err.println(al.size() +" imagens lidas");
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+	}
+	
 	public static void main(String[] args) {
 		
 		Date dateIni = new Date();
@@ -66,6 +78,7 @@ public class Main {
 			
 //			Collections.shuffle(listaImagensEntrada);
 //			listaImagensEntrada = new ArrayList<Imagem>(listaImagensEntrada.subList(0, 10));
+
 			System.out.println(listaImagensEntrada.size() +" imagens separadas para teste");
 						
 			dateTemp = new Date();
@@ -96,10 +109,10 @@ public class Main {
 //				}
 				
 				// MANUAL
-				imgTemp = s.getPlaca(regioesCandidatas);
+				imgTemp = s.getPlaca(regioesCandidatas); // na melhor base 22 de 52
 				
 				// KNN
-//				imgTemp = KNN.run(listaImagensEntrada, regioesCandidatas);
+//				imgTemp = KNN.run(listaImagensEntrada, regioesCandidatas);  // na melhor base 9 de 52
 				
 				if(imgTemp == null){
 					System.err.println(imagem.getNome() +" eh dificil");

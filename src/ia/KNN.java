@@ -22,6 +22,7 @@ import org.opencv.imgcodecs.Imgcodecs;
 
 import model.Imagem;
 import model.PreProcessamento;
+import model.Segmentacao;
 
 public class KNN {
 	private static final String DIRECT_PROJECT = System.getProperty("user.dir");
@@ -32,11 +33,9 @@ public class KNN {
 	
 	public static Imagem run(ArrayList<Imagem> imagensEntrada, ArrayList<Imagem> regioesCandidatas){
 		try {
-			if(regioesCandidatas != null && !regioesCandidatas.isEmpty()){
-				System.out.println("------> "+regioesCandidatas.size());
-				
+			if(regioesCandidatas != null && !regioesCandidatas.isEmpty()){				
 				if(basePlacas == null || basePlacas.isEmpty()){
-					basePlacas = Extractor.lerHistogramaARFF("base");
+					basePlacas = Extractor.lerVetorARFF("baseVetor");
 				}
 				System.out.println("Base de placas com "+basePlacas.size()+" histogramas carregada");
 				
@@ -51,12 +50,12 @@ public class KNN {
 					if(!imagensEntrada.contains(basePlacas.get(i))){ // garante que nao vai comparar com a base de teste
 						
 						for (Imagem imagem : regioesCandidatas) {
-							imagem.setDistancia(Distancia.euclidiana(imagem, basePlacas.get(i)));
+							imagem.setDistancia(Distancia.euclidianaVetor(imagem, basePlacas.get(i)));
 						}
 						
 						iMaior = regioesCandidatas.get(0);
 						for (int j = 1; j < regioesCandidatas.size(); j++) {
-							if(regioesCandidatas.get(j).getDistancia() > iMaior.getDistancia()){
+							if(regioesCandidatas.get(j).getDistancia() < iMaior.getDistancia()){
 								iMaior = regioesCandidatas.get(j);
 							}
 						}
@@ -90,7 +89,7 @@ public class KNN {
 				
 				int temp = -1;
 				for (Entry<Imagem, Integer> imagem : map.entrySet()) {
-					if(temp == -1 || imagem.getValue() > temp){
+					if(temp == -1 || imagem.getValue() < temp){
 						iMaior = imagem.getKey();
 					}
 				}
@@ -111,7 +110,7 @@ public class KNN {
 	
 	private static class Distancia{
 		
-		public static double euclidiana(Imagem i1, Imagem i2){
+		public static double euclidianaHist(Imagem i1, Imagem i2){
 			double soma = 0.0;
 			int ih1[] = i1.getHistograma();
 			int ih2[] = i2.getHistograma();
@@ -121,7 +120,7 @@ public class KNN {
 			return (double)Math.sqrt(soma);
 		}
 		
-		public static double manhattan(Imagem i1, Imagem i2){
+		public static double manhattanHist(Imagem i1, Imagem i2){
 			int soma = 0;
 			int ih1[] = i1.getHistograma();
 			int ih2[] = i2.getHistograma();
@@ -130,6 +129,31 @@ public class KNN {
 			}
 			return soma;
 		}
+		
+		public static double euclidianaVetor(Imagem i1, Imagem i2){
+			double soma = 0.0;
+			soma += Math.pow((i1.getAspect() - i2.getAspect()), 2);
+			soma += Math.pow((i1.getNorm() - i2.getNorm()), 2);
+			soma += Math.pow((i1.getMean() - i2.getMean()), 2);
+			soma += Math.pow((i1.getSum() - i2.getSum()), 2);
+			soma += Math.pow((i1.getTrace() - i2.getTrace()), 2);
+			soma += Math.pow((i1.getQuantidadePixelsClaros() - i2.getQuantidadePixelsClaros()), 2);
+			soma += Math.pow((i1.getQuantidadePixelsEscuros() - i2.getQuantidadePixelsEscuros()), 2);
+			return (double)Math.sqrt(soma);
+		}
+	
+		public static double manhattanVetor(Imagem i1, Imagem i2){
+			int soma = 0;
+			soma += Math.abs((i1.getAspect() - i2.getAspect()));
+			soma += Math.abs((i1.getNorm() - i2.getNorm()));
+			soma += Math.abs((i1.getMean() - i2.getMean()));
+			soma += Math.abs((i1.getSum() - i2.getSum()));
+			soma += Math.abs((i1.getTrace() - i2.getTrace()));
+			soma += Math.abs((i1.getQuantidadePixelsClaros() - i2.getQuantidadePixelsClaros()));
+			soma += Math.abs((i1.getQuantidadePixelsEscuros() - i2.getQuantidadePixelsEscuros()));
+			return soma;
+		}
+	
 	}
 	
 	public static class Extractor{
@@ -257,6 +281,101 @@ public class KNN {
 			dateFim.setTime(dateFim.getTime()-dateIni.getTime());
 			System.out.println("DURACAO: "+ dateFim.getTime()/1000 +" SEGUNDOS\n");
 		    return lHist;
+		}
+		
+		public static void gerarVetorARFF(String nomeArquivo) throws FileNotFoundException{
+			ArrayList<Imagem> listaImagens = lerBasePlacas(diretorioBasePlacas);
+			int hist[];
+			String texto = 
+					  "% DETECCAO DE PLACAS VEICULARES"+ls
+					+ "% BRUNO MARQUES"+ls
+					+ "% DANNY QUEIROZ"+ls
+					+ "% PROCESSAMENTO DE IMAGENS 2016.2 - UFRPE"+ls+ls
+					+ "@RELATION deteccaoDePlacasVeiculares"+ls+ls;
+			
+			texto += "@ATTRIBUTE aspect NUMERIC"+ls;
+			texto += "@ATTRIBUTE norm NUMERIC"+ls;
+			texto += "@ATTRIBUTE mean NUMERIC"+ls;
+			texto += "@ATTRIBUTE sum NUMERIC"+ls;
+			texto += "@ATTRIBUTE trace NUMERIC"+ls;
+			texto += "@ATTRIBUTE whitePixels NUMERIC"+ls;
+			texto += "@ATTRIBUTE blackPixels NUMERIC"+ls;
+			
+			texto += "@ATTRIBUTE nome STRING"+ls;
+			texto += ls+"@DATA"+ls;
+			
+			String temp;
+			for (Imagem imagem : listaImagens) {
+				temp = (imagem.getMatriz().width() / imagem.getMatriz().height())+",";
+				temp += PreProcessamento.getNorm(imagem)+",";
+				temp += PreProcessamento.getMean(imagem).val[0]+",";
+				temp += PreProcessamento.getSum(imagem).val[0]+",";
+				temp += PreProcessamento.getTrace(imagem).val[0]+",";
+				temp += Segmentacao.getQuantidadePixelsClaros(imagem.getMatriz())+",";
+				temp += Segmentacao.getQuantidadePixelsEscuros(imagem.getMatriz())+",";
+				
+				texto += temp + imagem.getNome() + ls;
+			}
+			
+			gravarArquivo(diretorioBasePlacas+"/"+nomeArquivo+".arff", texto, false);
+		}
+		
+		public static ArrayList<Imagem> lerVetorARFF(String nomeArquivo) throws IOException{
+			Date dateIni = new Date();
+			Date dateFim;
+			System.out.println("LENDO BASE ARFF AS: "+ dateIni.toString());
+			
+			ArrayList<Imagem> lVetor = new ArrayList<>();
+			File arquivo = new File(diretorioBasePlacas+"/"+nomeArquivo+".arff");
+			BufferedReader conteudo = new BufferedReader(new FileReader(arquivo));
+			int offset = 17; // numero de linhas que nao importam
+			String arrays[], arrayi[];
+			double mean, sum, trace;
+			
+			int cont = 0;
+		    while (conteudo.ready()) {
+		    	if(offset > 0){
+		    		offset--;
+		    		conteudo.readLine();
+		    		continue;
+		    	}
+		    	arrays = conteudo.readLine().trim().replace(ls, "").split(",");
+		    	
+		    	if(arrays.length == 8){ // 7 valores e o nome da placa
+		    		
+		    		arrayi = arrays[2].split("#");		    		
+		    		mean = Double.parseDouble(arrayi[0]);
+		    		
+		    		arrayi = arrays[3].split("#");
+		    		sum = Double.parseDouble(arrayi[0]);
+		    		
+		    		arrayi = arrays[4].split("#");
+		    		trace = Double.parseDouble(arrayi[0]);
+		    		
+			    	lVetor.add(new Imagem(
+			    			arrays[7],
+			    			Double.parseDouble(arrays[0]+""),
+			    			Double.parseDouble(arrays[1]+""), 
+			    			mean,
+			    			sum,
+			    			trace,
+			    			Float.parseFloat(arrays[5]+""),
+			    			Float.parseFloat(arrays[6]+"")
+			    			));
+		    	}else{
+		    		System.err.println("Linha "+ cont +" com tamanho "+ arrays.length +" "+arrays[0]);
+		    	}
+		    	
+		    	if(++cont %50 == 0){
+		    		System.out.println(cont +" lidos");
+		    	}
+		    }
+		    
+		    dateFim = new Date();
+			System.out.println("TERMINOU DE LER A BASE AS: "+ dateFim.toString());
+			dateFim.setTime(dateFim.getTime()-dateIni.getTime());
+			System.out.println("DURACAO: "+ dateFim.getTime()/1000 +" SEGUNDOS\n");
+		    return lVetor;
 		}
 		
 		private static void gravarArquivo(String caminho, String conteudo, boolean append) {
