@@ -15,9 +15,10 @@ import org.opencv.core.Point;
 import org.opencv.core.Rect;
 import org.opencv.core.RotatedRect;
 import org.opencv.core.Scalar;
+import org.opencv.imgcodecs.Imgcodecs;
 import org.opencv.imgproc.Imgproc;
 
-
+//outro metodo para segmentacao: https://repositorio.ufba.br/ri/bitstream/ri/20966/1/mono_tiagoaraujo_bsi_2016.1%5BLAPV%5D.pdf	
 public class Segmentacao {
 
 	private String diretorioSaida;
@@ -147,9 +148,13 @@ public class Segmentacao {
 		                if(cropped.width() <= 50){
 		                	continue;
 		                }
-//		                Imgproc.drawContours(cropped, contours_poly, i, new Scalar(255, 0, 255));
+		                
+//		                Imgproc.drawContours(imagemOriginal.getMatriz(), contours_poly, i, new Scalar(255, 0, 255));
+//		                imagemOriginal.setNome(imagemOriginal.getNome()+"_DRAW");
+//		                imagemOriginal.gravar();
+		                
 		                Imagem imgCandidata = new Imagem(imagemOriginal.getNome() +"_cand_"+i, imagemOriginal.getFormato(), diretorioSaida, cropped);
-		                		                
+		               
 		                //////////////////////////////////////////
 		                // Segmentacao pelo KNN com vetor de caracteristicas estatisticas
 //		                PreProcessamento.getNorm(imgCandidata);

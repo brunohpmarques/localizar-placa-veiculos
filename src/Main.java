@@ -22,7 +22,7 @@ import model.Segmentacao;
 public class Main {
 	
 	private static final String DIRECT_PROJECT = System.getProperty("user.dir");
-	private static final String DIRECT_ENTRADA = DIRECT_PROJECT +"/entrada5";
+	private static final String DIRECT_ENTRADA = DIRECT_PROJECT +"/entrada3";
 	private static final String DIRECT_PREPROCESSAMENTO = DIRECT_PROJECT +"/preprocessamento";
 	private static final String DIRECT_SEGMENTACAO = DIRECT_PROJECT +"/segmentacao";
 	
@@ -94,13 +94,13 @@ public class Main {
 			int proc = 0;
 			for (Imagem imagem : listaImagensEntrada) {			
 
-				imgTemp = AlgoritmosPreProc.advanced(imagem, pp);
+				imgTemp = AlgoritmosPreProc.clear(imagem, pp);
 //				imgTemp = AlgoritmosPreProc.Existentes.ufmgViniciusELucasEAparecido(imagem, pp);
 				
 				if(imgTemp == null){
 					continue;
 				}
-				
+
 				imgTemp.gravar();
 
 				regioesCandidatas = s.getRegioesCandidatas3(pp, imagem, imgTemp, 2);//0.25

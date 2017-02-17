@@ -3,7 +3,6 @@ import org.opencv.core.Core;
 import model.Imagem;
 import model.PreProcessamento;
 
-// outro metodo: https://repositorio.ufba.br/ri/bitstream/ri/20966/1/mono_tiagoaraujo_bsi_2016.1%5BLAPV%5D.pdf		
 public class AlgoritmosPreProc {
 	
 	// Ent		Segm	Acer	Erro	NaoEnc
@@ -82,7 +81,7 @@ public class AlgoritmosPreProc {
 			return imagem;
 		}
 		
-		//http://www.lbd.dcc.ufmg.br/colecoes/wvc/2006/0065.pdf
+		//http://www.lbd.dcc.ufmg.br/colecoes/wvc/2010/0047.pdf
 		// Ent		Segm	Acer	Erro	NaoEnc
 		// 50	->	50		5		45		0										 	
 		// 100	->	100		17		83		0	
