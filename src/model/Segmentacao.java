@@ -155,6 +155,7 @@ public class Segmentacao {
 		                
 		                Imagem imgCandidata = new Imagem(imagemOriginal.getNome() +"_cand_"+i, imagemOriginal.getFormato(), diretorioSaida, cropped);
 		               
+		                printComponentes(imgCandidata, pp);
 		                //////////////////////////////////////////
 		                // Segmentacao pelo KNN com vetor de caracteristicas estatisticas
 //		                PreProcessamento.getNorm(imgCandidata);
@@ -187,6 +188,43 @@ public class Segmentacao {
 	        }   
 	    }
 	    return regioesCandidatas;
+	}
+	
+	// Com este metodo aumentou para 232 acertos
+	private void printComponentes(Imagem img, PreProcessamento pp){
+		Imagem temp = img.clone();
+		temp = pp.paraTonsDeCinza(temp);
+		temp = pp.normalizar(temp);
+		temp = pp.filtroMediana(temp, 3);
+		temp = pp.filtroMediana(temp, 3);
+		temp = pp.paraPretoEBrancoGlobal(temp, 90);
+		temp = pp.filtroAutoCanny(temp, 0);
+		
+		List<MatOfPoint> contours = new ArrayList<MatOfPoint>();
+	    Mat hierarchy = new Mat();
+	    Imgproc.findContours(temp.getMatriz(), contours, hierarchy, Imgproc.RETR_EXTERNAL, Imgproc.CHAIN_APPROX_NONE);
+	    List<MatOfPoint> contours_poly = new ArrayList<MatOfPoint>(contours.size());
+	    contours_poly.addAll(contours);
+
+	    MatOfPoint2f mMOP2f1,mMOP2f2;
+	    mMOP2f1 = new MatOfPoint2f();
+	    mMOP2f2 = new MatOfPoint2f();
+	    
+	    int cont = 0;
+	    for(int i = 0; i < contours.size(); i++){
+	            contours.get(i).convertTo(mMOP2f1, CvType.CV_32FC2);
+	            mMOP2f2.convertTo(contours_poly.get(i), CvType.CV_32S);
+	            Imgproc.approxPolyDP(mMOP2f1, mMOP2f2, 8, false);
+	            
+	            if(contours_poly.get(i).toList().size() >= 3 && contours_poly.get(i).toList().size() <= 6){	            	
+//	                Imgproc.drawContours(temp.getMatriz(), contours_poly, i, new Scalar(255, 0, 255));
+//	                temp.setNome(temp.getNome()+"_DRAW");
+//	                temp.gravar();
+	            	cont++;
+	            }
+	        
+	    }
+		img.setTrace(cont);
 	}
 	
 	public static float getQuantidadePixelsClaros(Mat imagem){
@@ -246,7 +284,9 @@ public class Segmentacao {
 		}
         Imagem max = listaCandidatas.get(0);
         for (int i=1; i<listaCandidatas.size(); i++) {
-        	if(listaCandidatas.get(i).getQuantidadePixelsClaros() > listaCandidatas.get(i).getQuantidadePixelsEscuros()
+        	if((listaCandidatas.get(i).getTrace() >= max.getTrace() &&
+        		listaCandidatas.get(i).getTrace() >= 5 && listaCandidatas.get(i).getTrace() <= 7) &&
+        			listaCandidatas.get(i).getQuantidadePixelsClaros() > listaCandidatas.get(i).getQuantidadePixelsEscuros()
         			&& listaCandidatas.get(i).getQuantidadePixelsClaros() > max.getQuantidadePixelsClaros() 
         			&& listaCandidatas.get(i).getQuantidadePixelsEscuros() > max.getQuantidadePixelsEscuros()){
         		max = listaCandidatas.get(i);

@@ -38,7 +38,7 @@ public class AlgoritmosPreProc {
 		Imagem imgTemp1 = null, imgTemp2 = null;
 				
 		imagem = pp.paraTonsDeCinza(imagem);
-		imagem = pp.filtroBrilho(imagem, 0.30, 0.30);
+		imagem = pp.ajustarBrilho(imagem, 0.30, 0.30);
 		imagem = pp.filtroMediana(imagem, 5);
 		
 		imagem = pp.paraPretoEBrancoLocal(imagem, 9, 5);//15, 5

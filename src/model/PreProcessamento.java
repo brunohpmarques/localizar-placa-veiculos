@@ -82,7 +82,7 @@ public class PreProcessamento {
 
 
 	/** Adiciona birlho na imagem **/
-	public Imagem filtroBrilho(Imagem imagem, double alpha, double beta) { // 10, 50
+	public Imagem ajustarBrilho(Imagem imagem, double alpha, double beta) { // 10, 50
 		Mat saida = imagem.getMatriz().clone();
 
 		imagem.getMatriz().convertTo(saida, -1, alpha, beta);
@@ -203,11 +203,12 @@ public class PreProcessamento {
 		}else{
 			saidaSize = saida.rows() / fator;
 			sizeEstrutura = new Size(1, saidaSize);
+			orientacao = VERTICAL;
 		}
 		
 		Mat horizontalStructure = Imgproc.getStructuringElement(Imgproc.MORPH_RECT, sizeEstrutura);
 		Imgproc.dilate(saida, saida, horizontalStructure, new Point(-1, -1), 1);	    
-	    return new Imagem(imagem.getNome() +"_fech"+orientacao, imagem.getFormato(), diretorioSaida, saida);
+	    return new Imagem(imagem.getNome() +"_dila"+orientacao, imagem.getFormato(), diretorioSaida, saida);
 	}
 	
 	/** Aplica operacao de intersecao em duas imagens **/
