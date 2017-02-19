@@ -6,9 +6,7 @@ import model.PreProcessamento;
 public class AlgoritmosPreProc {
 	
 	// Ent		Segm	Acer	Erro	NaoEnc
-	// 50	->	49		8		41		1
-	// 100	->	99		19		80		1
-	// 382	->	380		59		321		2
+	// 382	->	382		90		292		0
 	public static Imagem advanced(Imagem imagem, PreProcessamento pp){
 		Imagem imgTemp1 = null, imgTemp2 = null;
 				
@@ -31,9 +29,7 @@ public class AlgoritmosPreProc {
 	
 	// MELHOR
 	// Ent		Segm	Acer	Erro	NaoEnc
-	// 50	->	45		21		24		5 	
-	// 100	->	94		53		41		6
-	// 382	->	365		172		193		17
+	// 382	->	365		232		133		17
 	public static Imagem clear(Imagem imagem, PreProcessamento pp){
 		Imagem imgTemp1 = null, imgTemp2 = null;
 				
@@ -60,9 +56,7 @@ public class AlgoritmosPreProc {
 		
 		//http://www.prp.rei.unicamp.br/pibic/congressos/xviicongresso/paineis/059834.pdf
 		// Ent		Segm	Acer	Erro	NaoEnc
-		// 50	->	46		18		28		4 	
-		// 100	->	93		32		65		7
-		// 382	->	348		93		255		34
+		// 382	->	351		130		221		31
 		public static Imagem unicampCristiane(Imagem imagem, PreProcessamento pp){
 			imagem = pp.paraTonsDeCinza(imagem);
 			imagem = pp.paraPretoEBrancoGlobal(imagem, 128);
@@ -71,9 +65,7 @@ public class AlgoritmosPreProc {
 		
 		//http://www.lbd.dcc.ufmg.br/colecoes/wvc/2006/0065.pdf
 		// Ent		Segm	Acer	Erro	NaoEnc
-		// 50	->	13		5		8		37						 	
-		// 100	->	20		9		11		80	
-		// 382	->	92		19		73		290		
+		// 382	->	95		14		81		287		
 		public static Imagem ufmgDiegoEAndres(Imagem imagem, PreProcessamento pp){
 			imagem = pp.paraTonsDeCinza(imagem);
 			imagem = pp.filtroSobel(imagem, PreProcessamento.VERTICAL);
@@ -82,10 +74,8 @@ public class AlgoritmosPreProc {
 		}
 		
 		//http://www.lbd.dcc.ufmg.br/colecoes/wvc/2010/0047.pdf
-		// Ent		Segm	Acer	Erro	NaoEnc
-		// 50	->	50		5		45		0										 	
-		// 100	->	100		17		83		0	
-		// 382	->	382		57		325		0		
+		// Ent		Segm	Acer	Erro	NaoEnc	
+		// 382	->	382		100		282		0		
 		public static Imagem ufmgViniciusELucasEAparecido(Imagem imagem, PreProcessamento pp){
 			imagem = pp.paraTonsDeCinza(imagem);
 			imagem = pp.filtroMediana(imagem, 3);
