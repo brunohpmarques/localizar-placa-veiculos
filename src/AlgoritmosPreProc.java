@@ -22,8 +22,6 @@ public class AlgoritmosPreProc {
 		imagem = pp.morfoErosao(imagem, 3);
 		imagem = pp.morfoDilatacaoOrientacao(imagem, PreProcessamento.HORIZONTAL, 30);
 		imagem = pp.morfoDilatacao(imagem, 9);
-		
-		imagem.gravar();
 		return imagem;
 	}
 	
@@ -47,8 +45,6 @@ public class AlgoritmosPreProc {
 		imagem = pp.morfoErosao(imagem, 3);
 		imagem = pp.morfoDilatacaoOrientacao(imagem, PreProcessamento.HORIZONTAL, 30);
 		imagem = pp.morfoDilatacao(imagem, 9);
-		
-		imagem.gravar();
 		return imagem;
 	}
 
