@@ -21,10 +21,11 @@ import org.opencv.core.Mat;
 import org.opencv.imgcodecs.Imgcodecs;
 
 import model.Imagem;
-import model.PreProcessamento;
-import model.Segmentacao;
+import utils.Descritores;
+import utils.PreProcessamento;
+import utils.Segmentacao;
 
-public class KNN {
+public class MyKNN {
 	private static final String DIRECT_PROJECT = System.getProperty("user.dir");
 	private static final String diretorioBasePlacas = DIRECT_PROJECT+"/basePlacas";
 	private static final String ls = System.lineSeparator();
@@ -230,7 +231,7 @@ public class KNN {
 			String temp;
 			for (Imagem imagem : listaImagens) {
 				temp = "";
-				hist = PreProcessamento.getHistograma(imagem);
+				hist = Descritores.getHistograma(imagem);
 				for (int i = 0; i < hist.length; i++) {
 					temp += hist[i]+",";
 				}
@@ -307,12 +308,12 @@ public class KNN {
 			String temp;
 			for (Imagem imagem : listaImagens) {
 				temp = (imagem.getMatriz().width() / imagem.getMatriz().height())+",";
-				temp += PreProcessamento.getNorm(imagem)+",";
-				temp += PreProcessamento.getMean(imagem).val[0]+",";
-				temp += PreProcessamento.getSum(imagem).val[0]+",";
-				temp += PreProcessamento.getTrace(imagem).val[0]+",";
-				temp += Segmentacao.getQuantidadePixelsClaros(imagem.getMatriz())+",";
-				temp += Segmentacao.getQuantidadePixelsEscuros(imagem.getMatriz())+",";
+				temp += Descritores.getNorm(imagem)+",";
+				temp += Descritores.getMean(imagem).val[0]+",";
+				temp += Descritores.getSum(imagem).val[0]+",";
+				temp += Descritores.getTrace(imagem).val[0]+",";
+				temp += Descritores.getQuantidadePixelsClaros(imagem.getMatriz(), Descritores.LIMIAR_COR)+",";
+				temp += Descritores.getQuantidadePixelsEscuros(imagem.getMatriz(), Descritores.LIMIAR_COR)+",";
 				
 				texto += temp + imagem.getNome() + ls;
 			}

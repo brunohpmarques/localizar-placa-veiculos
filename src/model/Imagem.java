@@ -1,6 +1,5 @@
 package model;
 import org.opencv.core.Mat;
-import org.opencv.core.Scalar;
 import org.opencv.imgcodecs.Imgcodecs;
 
 public class Imagem {

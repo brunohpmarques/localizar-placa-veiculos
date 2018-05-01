@@ -1,0 +1,202 @@
+package utils;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Vector;
+
+import org.opencv.core.Core;
+import org.opencv.core.CvType;
+import org.opencv.core.Mat;
+import org.opencv.core.MatOfDMatch;
+import org.opencv.core.MatOfFloat;
+import org.opencv.core.MatOfInt;
+import org.opencv.core.MatOfKeyPoint;
+import org.opencv.core.MatOfPoint;
+import org.opencv.core.MatOfPoint2f;
+import org.opencv.core.Scalar;
+import org.opencv.core.TermCriteria;
+import org.opencv.features2d.DescriptorMatcher;
+import org.opencv.features2d.FeatureDetector;
+import org.opencv.imgproc.Imgproc;
+
+import model.Imagem;
+
+public class Descritores {
+	public static final double MARGEM_COR= 20;
+	public static final double LIMIAR_COR= 128;
+	
+	/** Retorna array do histograma de uma imagem **/
+	public static int[] getHistograma(Imagem img) {
+		int histograma[] = new int[256];
+	    
+	    Mat b_hist = getMatHistograma(img);
+	    
+	    for (int j = 0; j < b_hist.height(); j++) {
+	    	histograma[j] = (int)Math.round(b_hist.get(j, 0)[0]);
+		}	    
+	    return histograma;
+	}
+	
+	/** Retorna Mat do histograma de uma imagem **/
+	public static Mat getMatHistograma(Imagem img) {
+	    Vector<Mat> bgr_planes = new Vector<>();
+	    Core.split(img.getMatriz(), bgr_planes);
+	    
+	    MatOfInt histSize = new MatOfInt(256);
+	    MatOfFloat histRange = new MatOfFloat(0f, 256f);
+	    Mat b_hist = new  Mat();
+	    Imgproc.calcHist(bgr_planes, new MatOfInt(0), new Mat(), b_hist, histSize, histRange, false);
+	    return b_hist;
+	}
+
+	/** Retorna a normal de uma imagem **/
+	public static double getNorm(Imagem img){
+		return Core.norm(img.getMatriz());
+	}
+	
+	/** Retorna a media de uma imagem (double[] Scalar.val) **/
+	public static Scalar getMean(Imagem img){
+		return Core.mean(img.getMatriz());
+	}
+	
+	/** Retorna a soma dos elementos de uma imagem (double[] Scalar.val) **/
+	public static Scalar getSum(Imagem img){
+		return Core.sumElems(img.getMatriz());
+	}
+	
+	/** Retorna a soma dos elementos da diagonal de uma imagem (double[] Scalar.val) **/
+	public static Scalar getTrace(Imagem img){
+		return Core.trace(img.getMatriz());
+	}
+	
+	/** Retorna a soma dos elementos da diagonal de uma imagem **/
+	public static double getKMeans(Imagem img, int k){
+		Mat out = img.getMatriz().clone();
+		Mat samples = out.reshape(1, out.cols() * out.rows());
+		Mat samples32f = new Mat();
+		samples.convertTo(samples32f, CvType.CV_32F, 1.0 / 255.0);
+		
+		Mat labels = new Mat();
+		TermCriteria criteria = new TermCriteria(TermCriteria.COUNT, Integer.parseInt(out.total()+""), 1);
+		Mat centers = new Mat();
+		return Core.kmeans(samples32f, k, labels, criteria, 1, Core.KMEANS_PP_CENTERS, centers);
+	}
+	
+	/**Numero de pixels claros do segmento / Numero de pixels do segmento*/
+	public static float getQuantidadePixelsClaros(Mat imagem, double limiar){
+		double[] cor;
+		float countGray = 0;
+		for (int row = 0; row < imagem.width(); row++) {
+        	for (int col = 0; col < imagem.height(); col++) {
+        		cor = imagem.get(row, col);
+        		if(cor != null){
+        			// Se for aproximadamente cinza
+//        			if((cor[0] <= (cor[1]+margemCor) && cor[0] >= (cor[1]-margemCor) 
+//        			&& cor[1] <= (cor[2]+margemCor) && cor[1] >= (cor[2]-margemCor)
+//        			&& cor[0] <= (cor[2]+margemCor) && cor[0] >= (cor[2]-margemCor))
+//        			&& (cor[0]+cor[1]+cor[2]) >= minimoCor){
+//        				countGray++;
+//        			}
+        			
+        			if(cor[0] >= limiar){
+        				countGray++;
+                	}
+        		}
+			}
+		}
+		return (countGray / (imagem.width()*imagem.height()));
+	}
+	
+	/**Numero de pixels escuros do segmento / Numero de pixels do segmento*/
+	public static float getQuantidadePixelsEscuros(Mat imagem, double limiar){
+		double[] cor;
+		float countGray = 0;
+		for (int row = 0; row < imagem.width(); row++) {
+        	for (int col = 0; col < imagem.height(); col++) {
+        		cor = imagem.get(row, col);
+        		if(cor != null){        			
+        			// Se for aproximadamente preto
+//        			if((cor[0] <= (cor[1]+margemCor) && cor[0] >= (cor[1]-margemCor) 
+//                	&& cor[1] <= (cor[2]+margemCor) && cor[1] >= (cor[2]-margemCor)
+//                	&& cor[0] <= (cor[2]+margemCor) && cor[0] >= (cor[2]-margemCor))
+//                	&& (cor[0]+cor[1]+cor[2]) < minimoCor){
+//        				countBlack++;
+//                	}
+        			
+        			if(cor[0] < limiar){
+        				countGray++;
+                	}
+        		}
+			}
+		}
+		return (countGray / (imagem.width()*imagem.height()));
+	}
+	
+	public static int getQuantidadesComponentesInternos(Imagem img){
+		Imagem temp = img.clone();
+		temp = PreProcessamento.paraTonsDeCinza(temp);
+		temp = PreProcessamento.normalizar(temp);
+		temp = PreProcessamento.filtroMediana(temp, 3);
+		temp = PreProcessamento.filtroMediana(temp, 3);
+		temp = PreProcessamento.paraPretoEBrancoGlobal(temp, 90);
+		temp = PreProcessamento.filtroAutoCanny(temp, 0);
+		
+		List<MatOfPoint> contours = new ArrayList<MatOfPoint>();
+	    Mat hierarchy = new Mat();
+	    Imgproc.findContours(temp.getMatriz(), contours, hierarchy, Imgproc.RETR_EXTERNAL, Imgproc.CHAIN_APPROX_NONE);
+	    List<MatOfPoint> contours_poly = new ArrayList<MatOfPoint>(contours.size());
+	    contours_poly.addAll(contours);
+
+	    MatOfPoint2f mMOP2f1,mMOP2f2;
+	    mMOP2f1 = new MatOfPoint2f();
+	    mMOP2f2 = new MatOfPoint2f();
+	    
+	    int cont = 0;
+	    for(int i = 0; i < contours.size(); i++){
+	            contours.get(i).convertTo(mMOP2f1, CvType.CV_32FC2);
+	            mMOP2f2.convertTo(contours_poly.get(i), CvType.CV_32S);
+	            Imgproc.approxPolyDP(mMOP2f1, mMOP2f2, 8, false);
+	            
+	            if(contours_poly.get(i).toList().size() >= 3 && contours_poly.get(i).toList().size() <= 6){	            	
+//	                Imgproc.drawContours(temp.getMatriz(), contours_poly, i, new Scalar(255, 0, 255));
+//	                temp.setNome(temp.getNome()+"_DRAW");
+//	                temp.gravar();
+	            	cont++;
+	            }
+	        
+	    }
+		return cont;
+	}
+	
+	/*
+	 * Se der -> OpenCV Error: Bad argument (Specified feature detector type is not supported.) in cv::javaFeatureDetector::create
+	 * Solucao: http://stackoverflow.com/questions/30657774/surf-and-sift-algorithms-doesnt-work-in-opencv-3-0-java
+	 * */
+	private static Imagem sift(Imagem imagem){
+        Mat blurredImage = new Mat();
+        Mat output = new Mat();
+        Imagem img = imagem.clone();
+
+        // remove some noise
+        //Imgproc.blur(img.getMatriz(), blurredImage, new Size(7, 7));
+
+        //convert to gray
+        //Mat gray = new Mat(img.getMatriz().width(), img.getMatriz().height(), CvType.CV_8U, new Scalar(4));
+        Mat gray = new Mat(img.getMatriz().width(), img.getMatriz().height(), CvType.CV_8U);
+        Imgproc.cvtColor(img.getMatriz(), gray, Imgproc.COLOR_BGR2GRAY);
+
+		FeatureDetector fd = FeatureDetector.create(FeatureDetector.BRISK); //ORB, MSER, GFTT, HARRIS, SIMPLEBLOB, BRISK, AKAZE
+        MatOfKeyPoint regions = new MatOfKeyPoint();
+        fd.detect(gray, regions);
+
+        //System.out.println("REGIONS ARE: " + regions.rows());
+        //Features2d.drawKeypoints(gray, regions, output);
+        
+        DescriptorMatcher matcher = DescriptorMatcher.create(DescriptorMatcher.FLANNBASED);
+        MatOfDMatch matches = new MatOfDMatch();
+        matcher.match(output, matches);
+        
+        img.setMatriz(output);
+        return img;
+	}
+}
