@@ -18,7 +18,7 @@ public class Main {
 	private static final String DIRECT_ENTRADA = System.getProperty("user.dir") +"/baseTeste";
 	
 	static{
-		// Carrega OPENCV 3.1
+		// Carrega OPENCV
 		System.loadLibrary(Core.NATIVE_LIBRARY_NAME);
 		File fe = new File(DIRECT_ENTRADA);
 		if(!fe.exists()){
