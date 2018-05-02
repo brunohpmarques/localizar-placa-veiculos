@@ -10,7 +10,8 @@ import model.Imagem;
 import utils.FileUtil;
 import utils.Segmentacao;
 
-// documentacao http://www.w3ii.com/pt/java_dip/default.html
+// Instalar OpenCV: https://docs.opencv.org/3.0-beta/doc/tutorials/introduction/java_eclipse/java_eclipse.html
+// Documentacao http://www.w3ii.com/pt/java_dip/default.html
 // Referencia http://wiki.ifba.edu.br/ads/tiki-download_file.php?fileId=827
 public class Main {
 	
