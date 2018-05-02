@@ -1,71 +1,28 @@
 import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.Date;
-import java.util.LinkedList;
-import java.util.List;
-
-import javax.activation.MimetypesFileTypeMap;
-import javax.print.attribute.standard.NumberOfDocuments;
-import javax.swing.plaf.basic.BasicFormattedTextFieldUI;
 
 import org.opencv.core.Core;
-import org.opencv.core.CvType;
-import org.opencv.core.DMatch;
-import org.opencv.core.Mat;
-import org.opencv.core.MatOfDMatch;
-import org.opencv.core.MatOfKeyPoint;
-import org.opencv.core.Rect;
-import org.opencv.core.Scalar;
-import org.opencv.core.Size;
-import org.opencv.features2d.DescriptorExtractor;
-import org.opencv.features2d.DescriptorMatcher;
-import org.opencv.features2d.FeatureDetector;
-import org.opencv.features2d.Features2d;
-import org.opencv.imgcodecs.Imgcodecs;
-import org.opencv.imgproc.Imgproc;
 
 import ia.MyKNN;
 import ia.MySVM;
 import model.Imagem;
 import utils.FileUtil;
-import utils.PreProcessamento;
 import utils.Segmentacao;
 
 // documentacao http://www.w3ii.com/pt/java_dip/default.html
 // Referencia http://wiki.ifba.edu.br/ads/tiki-download_file.php?fileId=827
 public class Main {
 	
-	private static final String DIRECT_PROJECT = System.getProperty("user.dir");
-	private static final String DIRECT_ENTRADA = DIRECT_PROJECT +"/baseFaceis";
-	private static final String DIRECT_PREPROCESSAMENTO = DIRECT_PROJECT +"/preprocessamento";
-	private static final String DIRECT_SEGMENTACAO = DIRECT_PROJECT +"/segmentacao";
+	private static final String DIRECT_ENTRADA = System.getProperty("user.dir") +"/baseTeste";
 	
 	static{
 		// Carrega OPENCV 3.1
 		System.loadLibrary(Core.NATIVE_LIBRARY_NAME);
-		
-		// Cria as pastas se nao existir
 		File fe = new File(DIRECT_ENTRADA);
-		File fp = new File(DIRECT_PREPROCESSAMENTO);
-		File fs = new File(DIRECT_SEGMENTACAO);
-		
 		if(!fe.exists()){
 			fe.mkdirs();
-		}
-		
-		if(!fp.exists()){
-			fp.mkdirs();
-		}
-		
-		if(!fs.exists()){
-			fs.mkdirs();
-		}else{
-			fs.mkdirs();
-		}
-		
+		}		
 	}
 	
 	/**SVM*/

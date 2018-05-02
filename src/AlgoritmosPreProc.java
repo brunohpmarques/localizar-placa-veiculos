@@ -2,6 +2,7 @@ import org.opencv.core.Core;
 
 import model.Imagem;
 import utils.PreProcessamento;
+import utils.PreProcessamento.Orientacao;
 
 public class AlgoritmosPreProc {
 	
@@ -16,11 +17,11 @@ public class AlgoritmosPreProc {
 		imagem = PreProcessamento.filtroGaussiano(imagem, 3, -3);
 		imagem = PreProcessamento.normalizar(imagem);
 		imagem = PreProcessamento.filtroAutoCanny(imagem, 0);
-		imgTemp1 = PreProcessamento.morfoFechamentoOrientacao(imagem, PreProcessamento.HORIZONTAL, 30);
-		imgTemp2 = PreProcessamento.morfoFechamentoOrientacao(imagem, PreProcessamento.VERTICAL, 30);
+		imgTemp1 = PreProcessamento.morfoFechamentoOrientacao(imagem, Orientacao.HORIZONTAL, 30);
+		imgTemp2 = PreProcessamento.morfoFechamentoOrientacao(imagem, Orientacao.VERTICAL, 30);
 		imagem = PreProcessamento.intersecao(imgTemp1, imgTemp2);
 		imagem = PreProcessamento.morfoErosao(imagem, 3);
-		imagem = PreProcessamento.morfoDilatacaoOrientacao(imagem, PreProcessamento.HORIZONTAL, 30);
+		imagem = PreProcessamento.morfoDilatacaoOrientacao(imagem, Orientacao.HORIZONTAL, 30);
 		imagem = PreProcessamento.morfoDilatacao(imagem, 9);
 		return imagem;
 	}
@@ -38,12 +39,12 @@ public class AlgoritmosPreProc {
 		imagem = PreProcessamento.paraPretoEBrancoLocal(imagem, 9, 5);//15, 5
 		Core.bitwise_not(imagem.getMatriz(), imagem.getMatriz());
 		
-		imgTemp1 = PreProcessamento.morfoFechamentoOrientacao(imagem, PreProcessamento.HORIZONTAL, 30);
-		imgTemp2 = PreProcessamento.morfoFechamentoOrientacao(imagem, PreProcessamento.VERTICAL, 15);
+		imgTemp1 = PreProcessamento.morfoFechamentoOrientacao(imagem, Orientacao.HORIZONTAL, 30);
+		imgTemp2 = PreProcessamento.morfoFechamentoOrientacao(imagem, Orientacao.VERTICAL, 15);
 		imagem = PreProcessamento.intersecao(imgTemp1, imgTemp2);
 		
 		imagem = PreProcessamento.morfoErosao(imagem, 3);
-		imagem = PreProcessamento.morfoDilatacaoOrientacao(imagem, PreProcessamento.HORIZONTAL, 30);
+		imagem = PreProcessamento.morfoDilatacaoOrientacao(imagem, Orientacao.HORIZONTAL, 30);
 		imagem = PreProcessamento.morfoDilatacao(imagem, 9);
 		return imagem;
 	}
@@ -64,7 +65,7 @@ public class AlgoritmosPreProc {
 		// 382	->	95		14		81		287		
 		public static Imagem ufmgDiegoEAndres(Imagem imagem){
 			imagem = PreProcessamento.paraTonsDeCinza(imagem);
-			imagem = PreProcessamento.filtroSobel(imagem, PreProcessamento.VERTICAL);
+			imagem = PreProcessamento.filtroSobel(imagem, Orientacao.VERTICAL);
 			imagem = PreProcessamento.paraPretoEBrancoOTSU(imagem);
 			return imagem;
 		}

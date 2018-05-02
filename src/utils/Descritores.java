@@ -1,5 +1,6 @@
 package utils;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Vector;
@@ -24,6 +25,14 @@ import model.Imagem;
 public class Descritores {
 	public static final double MARGEM_COR= 20;
 	public static final double LIMIAR_COR= 128;
+	private static final String DIRECT_DESCRITORES = System.getProperty("user.dir") +"/resultados/descritores";
+	
+	static{
+		File fd = new File(DIRECT_DESCRITORES);		
+		if(!fd.exists()){
+			fd.mkdirs();
+		}		
+	}
 	
 	/** Retorna array do histograma de uma imagem **/
 	public static int[] getHistograma(Imagem img) {
@@ -83,21 +92,18 @@ public class Descritores {
 	}
 	
 	/**Numero de pixels claros do segmento / Numero de pixels do segmento*/
+	public static float getQuantidadePixelsClaros(Imagem imagem, double limiar){
+		return getQuantidadePixelsClaros(imagem.getMatriz(), limiar);
+	}
+	
+	/**Numero de pixels claros do segmento / Numero de pixels do segmento*/
 	public static float getQuantidadePixelsClaros(Mat imagem, double limiar){
 		double[] cor;
 		float countGray = 0;
 		for (int row = 0; row < imagem.width(); row++) {
         	for (int col = 0; col < imagem.height(); col++) {
         		cor = imagem.get(row, col);
-        		if(cor != null){
-        			// Se for aproximadamente cinza
-//        			if((cor[0] <= (cor[1]+margemCor) && cor[0] >= (cor[1]-margemCor) 
-//        			&& cor[1] <= (cor[2]+margemCor) && cor[1] >= (cor[2]-margemCor)
-//        			&& cor[0] <= (cor[2]+margemCor) && cor[0] >= (cor[2]-margemCor))
-//        			&& (cor[0]+cor[1]+cor[2]) >= minimoCor){
-//        				countGray++;
-//        			}
-        			
+        		if(cor != null){        			
         			if(cor[0] >= limiar){
         				countGray++;
                 	}
@@ -108,21 +114,18 @@ public class Descritores {
 	}
 	
 	/**Numero de pixels escuros do segmento / Numero de pixels do segmento*/
+	public static float getQuantidadePixelsEscuros(Imagem imagem, double limiar){
+		return getQuantidadePixelsEscuros(imagem.getMatriz(), limiar);
+	}
+	
+	/**Numero de pixels escuros do segmento / Numero de pixels do segmento*/
 	public static float getQuantidadePixelsEscuros(Mat imagem, double limiar){
 		double[] cor;
 		float countGray = 0;
 		for (int row = 0; row < imagem.width(); row++) {
         	for (int col = 0; col < imagem.height(); col++) {
         		cor = imagem.get(row, col);
-        		if(cor != null){        			
-        			// Se for aproximadamente preto
-//        			if((cor[0] <= (cor[1]+margemCor) && cor[0] >= (cor[1]-margemCor) 
-//                	&& cor[1] <= (cor[2]+margemCor) && cor[1] >= (cor[2]-margemCor)
-//                	&& cor[0] <= (cor[2]+margemCor) && cor[0] >= (cor[2]-margemCor))
-//                	&& (cor[0]+cor[1]+cor[2]) < minimoCor){
-//        				countBlack++;
-//                	}
-        			
+        		if(cor != null){        			        			
         			if(cor[0] < limiar){
         				countGray++;
                 	}
@@ -134,12 +137,29 @@ public class Descritores {
 	
 	public static int getQuantidadesComponentesInternos(Imagem img){
 		Imagem temp = img.clone();
-		temp = PreProcessamento.paraTonsDeCinza(temp);
-		temp = PreProcessamento.normalizar(temp);
-		temp = PreProcessamento.filtroMediana(temp, 3);
-		temp = PreProcessamento.filtroMediana(temp, 3);
-		temp = PreProcessamento.paraPretoEBrancoGlobal(temp, 90);
+		// OP1
+//		temp = PreProcessamento.paraTonsDeCinza(temp);
+//		temp = PreProcessamento.normalizar(temp);
+//		temp = PreProcessamento.filtroMediana(temp, 5);
+//		Scalar scalar = Descritores.getMean(temp);
+//		temp = PreProcessamento.paraPretoEBrancoGlobal(temp, scalar.val[0]);//90
+//		temp = PreProcessamento.filtroAutoCanny(temp, 0);
+		
+		// OP2
+//		temp = PreProcessamento.paraTonsDeCinza(temp);
+//		temp = PreProcessamento.filtroMediana(temp, 3);
+//		temp = PreProcessamento.filtroNitidez(temp, 3, 1, 101, -101);
+//		temp = PreProcessamento.filtroContraste(temp, 10);
+//		Scalar scalar = Descritores.getMean(temp);
+//		temp = PreProcessamento.paraPretoEBrancoGlobal(temp, scalar.val[0]);
+//		temp = PreProcessamento.filtroAutoCanny(temp, 0);
+		
+		// OP3
+		temp = PreProcessamento.filtroMediana(temp, 5);
 		temp = PreProcessamento.filtroAutoCanny(temp, 0);
+		
+//		temp.setCaminho(DIRECT_DESCRITORES);
+//		temp.gravar();
 		
 		List<MatOfPoint> contours = new ArrayList<MatOfPoint>();
 	    Mat hierarchy = new Mat();

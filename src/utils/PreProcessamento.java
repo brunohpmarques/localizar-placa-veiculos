@@ -1,4 +1,6 @@
 package utils;
+import java.io.File;
+
 import org.opencv.core.Core;
 import org.opencv.core.CvType;
 import org.opencv.core.Mat;
@@ -13,13 +15,29 @@ import model.Imagem;
  * @author Danny Queiroz
  */
 public class PreProcessamento {
-	public static final char HORIZONTAL = 'H';
-	public static final char VERTICAL = 'V';
-	public static final char TODOS = 'T';
-	public static final char POSITIVA = 'P';
-	public static final char NEGATIVA = 'N';
+	public enum Orientacao{
+		TODOS('T'), HORIZONTAL('H'), VERTICAL('V');
+		public char label;
+		Orientacao(char label) {
+			this.label = label;
+		}
+	}
+	public enum Sinal{
+		POSITIVO('P'), NEGATIVO('N');
+		public char label;
+		Sinal(char label) {
+			this.label = label;
+		}
+	}
 
-	private static final String DIRECT_PREPROCESSAMENTO = System.getProperty("user.dir") +"/preprocessamento";
+	private static final String DIRECT_PREPROCESSAMENTO = System.getProperty("user.dir") +"/resultados/preprocessamento";
+	
+	static{
+		File fp = new File(DIRECT_PREPROCESSAMENTO);		
+		if(!fp.exists()){
+			fp.mkdirs();
+		}		
+	}
 	
 	/** Normaliza imagem de entrada **/
 	public static Imagem normalizar(Imagem imagem) {
@@ -162,12 +180,12 @@ public class PreProcessamento {
 	}
 	
 	/** Aplica operacao de fechamento horizontal ou vertical na imagem **/
-	public static Imagem morfoFechamentoOrientacao(Imagem imagem, char orientacao, int fator){// 20		
+	public static Imagem morfoFechamentoOrientacao(Imagem imagem, Orientacao orientacao, int fator){// 20		
 		Mat saida = imagem.getMatriz().clone();
 		int saidaSize;
 		Size sizeEstrutura;
 		
-		if(orientacao == HORIZONTAL){
+		if(orientacao == Orientacao.HORIZONTAL){
 			saidaSize = saida.cols() / fator;
 			sizeEstrutura = new Size(saidaSize, 1);
 		}else{
@@ -183,18 +201,18 @@ public class PreProcessamento {
 	}
 	
 	/** Aplica operacao de dilatacao horizontal ou vertical na imagem **/
-	public static Imagem morfoDilatacaoOrientacao(Imagem imagem, char orientacao, int fator){// 20		
+	public static Imagem morfoDilatacaoOrientacao(Imagem imagem, Orientacao orientacao, int fator){// 20		
 		Mat saida = imagem.getMatriz().clone();
 		int saidaSize;
 		Size sizeEstrutura;
 		
-		if(orientacao == HORIZONTAL){
+		if(orientacao == Orientacao.HORIZONTAL){
 			saidaSize = saida.cols() / fator;
 			sizeEstrutura = new Size(saidaSize, 1);
 		}else{
 			saidaSize = saida.rows() / fator;
 			sizeEstrutura = new Size(1, saidaSize);
-			orientacao = VERTICAL;
+			orientacao = Orientacao.VERTICAL;
 		}
 		
 		Mat horizontalStructure = Imgproc.getStructuringElement(Imgproc.MORPH_RECT, sizeEstrutura);
@@ -211,11 +229,11 @@ public class PreProcessamento {
 	}
 
 	/** Aplica Prewitt na imagem **/
-	public static Imagem filtroPrewitt(Imagem imagem, char orientation) {
+	public static Imagem filtroPrewitt(Imagem imagem, Orientacao orientation) {
 		Mat saida = imagem.getMatriz().clone();
 		Mat mask = new Mat(3, 3, CvType.CV_32F);
 		
-		if(orientation == HORIZONTAL){
+		if(orientation == Orientacao.HORIZONTAL){
 			mask.put(0, 0, -1);
 			mask.put(0, 1, -1);
 			mask.put(0, 2, -1);
@@ -227,7 +245,7 @@ public class PreProcessamento {
 			mask.put(2, 0, 1);
 			mask.put(2, 1, 1);
 			mask.put(2, 2, 1);
-		}else if(orientation == VERTICAL){
+		}else if(orientation == Orientacao.VERTICAL){
 			mask.put(0, 0, -1);
 			mask.put(0, 1, 0);
 			mask.put(0, 2, 1);
@@ -240,7 +258,7 @@ public class PreProcessamento {
 			mask.put(2, 1, 0);
 			mask.put(2, 2, 1);
 		}else{
-			orientation = TODOS;
+			orientation = Orientacao.TODOS;
 			mask.put(0, 0, 0);
 			mask.put(0, 1, 2);
 			mask.put(0, 2, 2);
@@ -259,11 +277,11 @@ public class PreProcessamento {
 	}
 
 	/** Aplica Sobel na imagem **/
-	public static Imagem filtroSobel(Imagem imagem, char orientation) {
+	public static Imagem filtroSobel(Imagem imagem, Orientacao orientation) {
 		Mat saida = imagem.getMatriz().clone();
 		Mat mask = new Mat(3, 3, CvType.CV_32F);
 		
-		if(orientation == HORIZONTAL){
+		if(orientation == Orientacao.HORIZONTAL){
 			mask.put(0, 0, -1);
 			mask.put(0, 1, -2);
 			mask.put(0, 2, -1);
@@ -275,7 +293,7 @@ public class PreProcessamento {
 			mask.put(2, 0, 1);
 			mask.put(2, 1, 2);
 			mask.put(2, 2, 1);
-		}else if(orientation == VERTICAL){
+		}else if(orientation == Orientacao.VERTICAL){
 			mask.put(0, 0, -1);
 			mask.put(0, 1, 0);
 			mask.put(0, 2, 1);
@@ -288,7 +306,7 @@ public class PreProcessamento {
 			mask.put(2, 1, 0);
 			mask.put(2, 2, 1);
 		}else{
-			orientation = TODOS;
+			orientation = Orientacao.TODOS;
 			mask.put(0, 0, 0);
 			mask.put(0, 1, 2);
 			mask.put(0, 2, 2);
@@ -342,11 +360,11 @@ public class PreProcessamento {
 	}
 	
 	/** Aplica filtro laplaciano na imagem **/
-	public static Imagem filtroLaplaciano(Imagem imagem, char valor) {
+	public static Imagem filtroLaplaciano(Imagem imagem, Sinal valor) {
 		Mat saida = imagem.getMatriz().clone();
 		Mat mask = new Mat(3, 3, CvType.CV_32F);
 		
-		if(valor == NEGATIVA){
+		if(valor == Sinal.NEGATIVO){
 			mask.put(0, 0, 0);
 			mask.put(0, 1, -1);
 			mask.put(0, 2, 0);
@@ -359,7 +377,7 @@ public class PreProcessamento {
 			mask.put(2, 1, -1);
 			mask.put(2, 2, 0);
 		}else{
-			valor = POSITIVA;
+			valor = Sinal.POSITIVO;
 			mask.put(0, 0, 0);
 			mask.put(0, 1, 1);
 			mask.put(0, 2, 0);

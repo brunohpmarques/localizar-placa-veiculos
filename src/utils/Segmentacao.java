@@ -1,4 +1,5 @@
 package utils;
+import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -14,8 +15,15 @@ import model.Imagem;
 //outro metodo para segmentacao: https://repositorio.ufba.br/ri/bitstream/ri/20966/1/mono_tiagoaraujo_bsi_2016.1%5BLAPV%5D.pdf	
 public class Segmentacao {
 
-	private static final String DIRECT_SEGMENTACAO = System.getProperty("user.dir") +"/segmentacao";
+	private static final String DIRECT_SEGMENTACAO = System.getProperty("user.dir") +"/resultados/segmentacao";
 
+	static{
+		File fs = new File(DIRECT_SEGMENTACAO);		
+		if(!fs.exists()){
+			fs.mkdirs();
+		}		
+	}
+	
 	public static ArrayList<Imagem> getRegioesCandidatas(Imagem imagemOriginal, Imagem processada, double margemTamanho){
 		ArrayList<Imagem> regioesCandidatas = new ArrayList<Imagem>();
 		List<MatOfPoint> contours = new ArrayList<MatOfPoint>();
