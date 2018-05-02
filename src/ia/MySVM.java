@@ -1,5 +1,6 @@
 package ia;
 
+import java.io.File;
 import java.io.FileNotFoundException;
 import java.util.ArrayList;
 
@@ -21,6 +22,18 @@ public class MySVM {
 	private static final String TRAIN_XML = "data/train.xml";
 	private static final String TEST_XML = "data/test.xml";
 	private SVM cvSVM;
+	
+	static{
+		File fd = new File(PATH_POSITIVE);		
+		if(!fd.exists()){
+			fd.mkdirs();
+		}	
+		
+		fd = new File(PATH_NEGATIVE);
+		if(!fd.exists()){
+			fd.mkdirs();
+		}
+	}
 	
 	public MySVM () {
 		this.cvSVM = SVM.create();
@@ -62,6 +75,8 @@ public class MySVM {
 	        for (int i = 0; i < imagens.size(); i++) {
 	        	img = imagens.get(i);
 	        	mat = img.getMatriz();
+	        	
+	        	Descritores.sift(mat);
 	        	
 	        	normal = (float) Descritores.getNorm(img);
 	        	mean = (float) Descritores.getMean(img).val[0];

@@ -18,6 +18,7 @@ import org.opencv.core.Scalar;
 import org.opencv.core.TermCriteria;
 import org.opencv.features2d.DescriptorMatcher;
 import org.opencv.features2d.FeatureDetector;
+import org.opencv.features2d.Features2d;
 import org.opencv.imgproc.Imgproc;
 
 import model.Imagem;
@@ -155,12 +156,13 @@ public class Descritores {
 //		temp = PreProcessamento.filtroAutoCanny(temp, 0);
 		
 		// OP3
+		temp = PreProcessamento.paraTonsDeCinza(temp);
 		temp = PreProcessamento.filtroMediana(temp, 5);
 		temp = PreProcessamento.filtroAutoCanny(temp, 0);
 		
 //		temp.setCaminho(DIRECT_DESCRITORES);
 //		temp.gravar();
-		
+				
 		List<MatOfPoint> contours = new ArrayList<MatOfPoint>();
 	    Mat hierarchy = new Mat();
 	    Imgproc.findContours(temp.getMatriz(), contours, hierarchy, Imgproc.RETR_EXTERNAL, Imgproc.CHAIN_APPROX_NONE);
@@ -192,31 +194,36 @@ public class Descritores {
 	 * Se der -> OpenCV Error: Bad argument (Specified feature detector type is not supported.) in cv::javaFeatureDetector::create
 	 * Solucao: http://stackoverflow.com/questions/30657774/surf-and-sift-algorithms-doesnt-work-in-opencv-3-0-java
 	 * */
-	private static Imagem sift(Imagem imagem){
+	public static MatOfKeyPoint sift(Imagem imagem){
+        return sift(imagem.getMatriz());
+	}
+	
+	private static int id = 0;
+	public static MatOfKeyPoint sift(Mat imagem){
         Mat blurredImage = new Mat();
         Mat output = new Mat();
-        Imagem img = imagem.clone();
 
         // remove some noise
-        //Imgproc.blur(img.getMatriz(), blurredImage, new Size(7, 7));
+        //Imgproc.blur(imagem, blurredImage, new Size(7, 7));
 
         //convert to gray
-        //Mat gray = new Mat(img.getMatriz().width(), img.getMatriz().height(), CvType.CV_8U, new Scalar(4));
-        Mat gray = new Mat(img.getMatriz().width(), img.getMatriz().height(), CvType.CV_8U);
-        Imgproc.cvtColor(img.getMatriz(), gray, Imgproc.COLOR_BGR2GRAY);
+        //Mat gray = new Mat(imagem.width(), imagem.height(), CvType.CV_8U, new Scalar(4));
+        Mat gray = new Mat(imagem.width(), imagem.height(), CvType.CV_8U);
+        Imgproc.cvtColor(imagem, gray, Imgproc.COLOR_BGR2GRAY);
 
 		FeatureDetector fd = FeatureDetector.create(FeatureDetector.BRISK); //ORB, MSER, GFTT, HARRIS, SIMPLEBLOB, BRISK, AKAZE
         MatOfKeyPoint regions = new MatOfKeyPoint();
         fd.detect(gray, regions);
 
-        //System.out.println("REGIONS ARE: " + regions.rows());
-        //Features2d.drawKeypoints(gray, regions, output);
+        Features2d.drawKeypoints(gray, regions, output);
+        new Imagem("teste"+(++id), ".jpg", "data/", output).gravar();
         
-        DescriptorMatcher matcher = DescriptorMatcher.create(DescriptorMatcher.FLANNBASED);
-        MatOfDMatch matches = new MatOfDMatch();
-        matcher.match(output, matches);
         
-        img.setMatriz(output);
-        return img;
+        //DescriptorMatcher matcher = DescriptorMatcher.create(DescriptorMatcher.FLANNBASED);
+        //MatOfDMatch matches = new MatOfDMatch();
+        //matcher.match(output, matches);
+        //img.setMatriz(output);
+        System.out.println("KeyPoints: "+regions.rows());
+        return regions;
 	}
 }
