@@ -35,15 +35,16 @@ public class MySVM {
 		return img;
 	}
 	
-	private Mat getMat(float normal, float mean, float sum, float trace, float pixelsClaros, float pixelsEscuros, float compInternos){
-		Mat mat = new Mat(new Size(7, 1), CvType.CV_32F);
+	private Mat getMat(float normal, float mean, float sum, float trace, float kmeans, float pixelsClaros, float pixelsEscuros, float compInternos){
+		Mat mat = new Mat(new Size(8, 1), CvType.CV_32F);
 		mat.put(0, 0, normal);
 		mat.put(1, 0, mean);
 		mat.put(2, 0, sum);
 		mat.put(3, 0, trace);
-		mat.put(4, 0, pixelsClaros);
-		mat.put(5, 0, pixelsEscuros);
-		mat.put(6, 0, compInternos);
+		mat.put(4, 0, kmeans);
+		mat.put(5, 0, pixelsClaros);
+		mat.put(6, 0, pixelsEscuros);
+		mat.put(7, 0, compInternos);
 		return mat;
 	}
 	
@@ -52,7 +53,7 @@ public class MySVM {
 			int maxData = 10;
 	        int count = 0;
 	        float normal, mean, sum, trace, kmeans, pixelsClaros, pixelsEscuros, compInternos;
-	        Mat trainingData = new Mat(new Size(7, maxData*2), CvType.CV_32F);
+	        Mat trainingData = new Mat(new Size(8, maxData*2), CvType.CV_32F);
 	        Mat trainingLabels = new Mat(new Size(1, maxData*2), CvType.CV_32SC1);
 	        Mat mat;
 	        Imagem img;
@@ -67,12 +68,13 @@ public class MySVM {
 	        	mean = (float) Descritores.getMean(img).val[0];
 	        	sum = (float) Descritores.getSum(img).val[0];
 	        	trace = (float) Descritores.getTrace(img).val[0];
+	        	kmeans = (float) Descritores.getKMeans(img, 4);
 	        	pixelsClaros = Descritores.getQuantidadePixelsClaros(mat, Descritores.LIMIAR_COR);
 	        	pixelsEscuros = Descritores.getQuantidadePixelsEscuros(mat, Descritores.LIMIAR_COR);
 	        	compInternos = Descritores.getQuantidadesComponentesInternos(img);
 	        	System.out.println(img.getNome()+" - 1 - "+normal+" - "+mean+" - "+sum+" - "+trace+" - "+pixelsClaros+" - "+pixelsEscuros+" - "+compInternos);
 	        		        	
-	        	mat = getMat(normal, mean, sum, trace, pixelsClaros, pixelsEscuros, compInternos);
+	        	mat = getMat(normal, mean, sum, trace, kmeans, pixelsClaros, pixelsEscuros, compInternos);
 	        	trainingData.row(count).push_back(mat);
 	        	trainingLabels.put(count, 0, 1);
 	        	count++;
@@ -93,7 +95,7 @@ public class MySVM {
 	        	compInternos = Descritores.getQuantidadesComponentesInternos(img);
 	        	System.out.println(img.getNome()+" - 0 - "+normal+" - "+mean+" - "+sum+" - "+trace+" - "+pixelsClaros+" - "+pixelsEscuros+" - "+compInternos);
 	        	
-	        	mat = getMat(normal, mean, sum, trace, pixelsClaros, pixelsEscuros, compInternos);
+	        	mat = getMat(normal, mean, sum, trace, kmeans, pixelsClaros, pixelsEscuros, compInternos);
 	        	trainingData.row(count).push_back(mat);
 	        	trainingLabels.put(count, 0, 0);
 	        	count++;
@@ -108,7 +110,7 @@ public class MySVM {
 		if(this.cvSVM.isTrained()) {
 			ArrayList<Imagem> imgOutputs = new ArrayList<>();
 			float result = -1;
-			float normal, mean, sum, trace, pixelsClaros, pixelsEscuros, compInternos;
+			float normal, mean, sum, trace, kmeans, pixelsClaros, pixelsEscuros, compInternos;
 	        Mat mat;
 			
 			for (Imagem imagem : imgInputs) {
@@ -118,12 +120,13 @@ public class MySVM {
 	        	mean = (float) Descritores.getMean(imagem).val[0];
 	        	sum = (float) Descritores.getSum(imagem).val[0];
 	        	trace = (float) Descritores.getTrace(imagem).val[0];
+	        	kmeans = (float) Descritores.getKMeans(imagem, 4);
 	        	pixelsClaros = Descritores.getQuantidadePixelsClaros(mat, Descritores.LIMIAR_COR);
 	        	pixelsEscuros = Descritores.getQuantidadePixelsEscuros(mat, Descritores.LIMIAR_COR);
 	        	compInternos = Descritores.getQuantidadesComponentesInternos(imagem);
 	        	System.err.println(imagem.getNome()+"? "+normal+" - "+mean+" - "+sum+" - "+trace+" - "+pixelsClaros+" - "+pixelsEscuros+" - "+compInternos);
 	        	
-	        	mat = getMat(normal, mean, sum, trace, pixelsClaros, pixelsEscuros, compInternos);
+	        	mat = getMat(normal, mean, sum, trace, kmeans, pixelsClaros, pixelsEscuros, compInternos);
 				result = this.cvSVM.predict(mat);
 				if(result == 1) {
 					imgOutputs.add(imagem);
@@ -133,13 +136,13 @@ public class MySVM {
 				}
 			}
 			
-			mat = getMat(4737.75f, 67.63452f, 70137.0f, 1046.0f, 0.029893925f, 0.2487946f, 2.0f);
-			result = this.cvSVM.predict(mat);
-			if(result == 1) {
-				System.err.println("1: FAKE");
-			}else {
-				System.err.println("0: FAKE");
-			}
+//			mat = getMat(4737.75f, 67.63452f, 70137.0f, 1046.0f, 0.029893925f, 0.2487946f, 2.0f);
+//			result = this.cvSVM.predict(mat);
+//			if(result == 1) {
+//				System.err.println("1: FAKE");
+//			}else {
+//				System.err.println("0: FAKE");
+//			}
 			
 			
 	        //this.cvSVM.save(TEST_XML);
