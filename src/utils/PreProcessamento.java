@@ -344,7 +344,7 @@ public class PreProcessamento {
 			sigma = 0.33;
 		}
 		
-//		imagem = filtroGaussiano(imagem, 3, 0);
+		imagem = filtroGaussiano(imagem, 3, 0);
 		
 		Mat saida = imagem.getMatriz().clone();
 		MatOfDouble mu = new MatOfDouble();

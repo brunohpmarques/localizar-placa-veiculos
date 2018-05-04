@@ -8,24 +8,28 @@ import java.util.Vector;
 import org.opencv.core.Core;
 import org.opencv.core.CvType;
 import org.opencv.core.Mat;
-import org.opencv.core.MatOfDMatch;
+import org.opencv.core.MatOfDouble;
 import org.opencv.core.MatOfFloat;
 import org.opencv.core.MatOfInt;
 import org.opencv.core.MatOfKeyPoint;
 import org.opencv.core.MatOfPoint;
 import org.opencv.core.MatOfPoint2f;
+import org.opencv.core.MatOfRect;
 import org.opencv.core.Scalar;
+import org.opencv.core.Size;
 import org.opencv.core.TermCriteria;
-import org.opencv.features2d.DescriptorMatcher;
 import org.opencv.features2d.FeatureDetector;
 import org.opencv.features2d.Features2d;
 import org.opencv.imgproc.Imgproc;
+import org.opencv.objdetect.HOGDescriptor;
 
 import model.Imagem;
+import utils.PreProcessamento.Orientacao;
+import utils.PreProcessamento.Sinal;
 
 public class Descritores {
-	public static final double MARGEM_COR= 20;
-	public static final double LIMIAR_COR= 128;
+	public static final double MARGEM_COR = 20;
+	public static final double LIMIAR_COR = 128;
 	private static final String DIRECT_DESCRITORES = System.getProperty("user.dir") +"/resultados/descritores";
 	
 	static{
@@ -144,7 +148,7 @@ public class Descritores {
 //		temp = PreProcessamento.filtroMediana(temp, 5);
 //		Scalar scalar = Descritores.getMean(temp);
 //		temp = PreProcessamento.paraPretoEBrancoGlobal(temp, scalar.val[0]);//90
-//		temp = PreProcessamento.filtroAutoCanny(temp, 0);
+//		temp = PreProcessamento.filtroAutoCanny(temp, 3);
 		
 		// OP2
 //		temp = PreProcessamento.paraTonsDeCinza(temp);
@@ -153,15 +157,15 @@ public class Descritores {
 //		temp = PreProcessamento.filtroContraste(temp, 10);
 //		Scalar scalar = Descritores.getMean(temp);
 //		temp = PreProcessamento.paraPretoEBrancoGlobal(temp, scalar.val[0]);
-//		temp = PreProcessamento.filtroAutoCanny(temp, 0);
+//		temp = PreProcessamento.filtroAutoCanny(temp, 3);
 		
 		// OP3
-		temp = PreProcessamento.paraTonsDeCinza(temp);
-		temp = PreProcessamento.filtroMediana(temp, 5);
-		temp = PreProcessamento.filtroAutoCanny(temp, 0);
+//		temp = PreProcessamento.paraTonsDeCinza(temp);
+		temp = PreProcessamento.filtroMediana(temp, 3);
+		temp = PreProcessamento.filtroAutoCanny(temp, 3);
 		
-//		temp.setCaminho(DIRECT_DESCRITORES);
-//		temp.gravar();
+		temp.setCaminho(DIRECT_DESCRITORES);
+		temp.gravar();
 				
 		List<MatOfPoint> contours = new ArrayList<MatOfPoint>();
 	    Mat hierarchy = new Mat();
@@ -199,7 +203,7 @@ public class Descritores {
 	}
 	
 	private static int id = 0;
-	public static MatOfKeyPoint sift(Mat imagem){
+	private static MatOfKeyPoint sift(Mat imagem){
         Mat blurredImage = new Mat();
         Mat output = new Mat();
 
@@ -216,7 +220,7 @@ public class Descritores {
         fd.detect(gray, regions);
 
         Features2d.drawKeypoints(gray, regions, output);
-        new Imagem("teste"+(++id), ".jpg", "data/", output).gravar();
+        new Imagem("sift"+(++id), ".jpg", "data/", output).gravar();
         
         
         //DescriptorMatcher matcher = DescriptorMatcher.create(DescriptorMatcher.FLANNBASED);
@@ -225,5 +229,48 @@ public class Descritores {
         //img.setMatriz(output);
         System.out.println("KeyPoints: "+regions.rows());
         return regions;
+	}
+	
+	/**Harris Corner Detection
+	 * @see https://docs.opencv.org/2.4/doc/tutorials/features2d/trackingmotion/harris_detector/harris_detector.html*/
+	public static Mat getHarrisCorner(Mat imagem, int thresh) {
+
+	    // This function implements the Harris Corner detection. The corners at intensity > thresh
+	    // are drawn.
+	    Mat Harris_scene = new Mat();
+
+	    Mat harris_scene_norm = new Mat(), harris_scene_scaled = new Mat();
+	    int blockSize = 9;
+	    int apertureSize = 5;
+	    double k = 0.1;
+	    Imgproc.cornerHarris(imagem, Harris_scene, blockSize, apertureSize,k);
+	    Core.normalize(Harris_scene, harris_scene_norm, 0, 255, Core.NORM_MINMAX, CvType.CV_32FC1, new Mat());
+	    Core.convertScaleAbs(harris_scene_norm, harris_scene_scaled);
+	    return harris_scene_scaled;
+	}
+	
+	public static int getCntHarrisCorner(Mat Scene, int thresh) {
+		Mat hc = getHarrisCorner(Scene, thresh);
+		int cnt = 0;
+	    for( int j = 0; j < hc.rows() ; j++){
+	        for( int i = 0; i < hc.cols(); i++){
+	            if ((int) hc.get(j,i)[0] > thresh){
+	                //Imgproc.circle(hc, new Point(i,j), 1 , new Scalar(255), 2 ,8 , 0);
+	            	cnt++;
+	            }
+	        }
+	    }
+	   //new Imagem("harrisCorner"+(++id), ".jpg", "data/", harris_scene_scaled).gravar();
+	    return cnt;
+	}
+	
+	public static MatOfRect getHOG(Mat imagem) {
+		HOGDescriptor hog = new HOGDescriptor();
+		MatOfRect foundLocations = new MatOfRect();
+        MatOfDouble foundWeights = new MatOfDouble();
+        Size winStride = new Size(8, 8);
+        Size padding = new Size(32, 32);
+		hog.detectMultiScale(imagem, foundLocations, foundWeights, 0, winStride, padding, 1, 255, false);
+		return foundLocations;
 	}
 }
