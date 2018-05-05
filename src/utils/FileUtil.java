@@ -3,6 +3,7 @@ package utils;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.util.ArrayList;
+import java.util.List;
 
 import javax.activation.MimetypesFileTypeMap;
 
@@ -12,6 +13,16 @@ import org.opencv.imgcodecs.Imgcodecs;
 import model.Imagem;
 
 public class FileUtil {
+	private static final List<String> FILE_TYPES;
+	public static final String EMPTY = "";
+	
+	static {
+		FILE_TYPES = new ArrayList<>();
+		FILE_TYPES.add(".jpeg");
+		FILE_TYPES.add(".jpg");
+		FILE_TYPES.add(".png");
+	}
+	
 	/** Recupera extensao de um arquivo **/
 	public static String getFileExtension(File file) {
 	    String name = file.getName();
@@ -45,10 +56,11 @@ public class FileUtil {
         String type;
         Mat matriz;
 		for (File arquivo : arrayArquivos) {
-			if(!arquivo.isDirectory() && arquivo.canRead()){
+			if(arquivo.isFile() && arquivo.canRead()){
 				mimetype = new MimetypesFileTypeMap().getContentType(arquivo);
-				type = mimetype.split("/")[0];
-				if(type.equals("image")){
+				//type = mimetype.split("/")[0];
+				type = getFileExtension(arquivo);
+				if(FILE_TYPES.contains(type.toLowerCase())){
 					type = getFileExtension(arquivo);
 					mimetype = arquivo.getName().replaceAll(type, "");
 					matriz = Imgcodecs.imread(arquivo.getAbsolutePath(), Imgcodecs.CV_LOAD_IMAGE_COLOR);

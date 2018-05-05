@@ -43,13 +43,13 @@ public class MySVM {
         this.cvSVM.setType(SVM.C_SVC);
         this.cvSVM.setC(100000);
         
-        TermCriteria criteria = new TermCriteria(TermCriteria.EPS + TermCriteria.MAX_ITER,100,0.1);
-        this.cvSVM.setKernel(SVM.LINEAR);
-        this.cvSVM.setType(SVM.C_SVC);
-        this.cvSVM.setGamma(0.5);
-        this.cvSVM.setNu(0.5);
-        this.cvSVM.setC(1);
-        this.cvSVM.setTermCriteria(criteria);
+//        TermCriteria criteria = new TermCriteria(TermCriteria.EPS + TermCriteria.MAX_ITER,100,0.1);
+//        this.cvSVM.setKernel(SVM.LINEAR);
+//        this.cvSVM.setType(SVM.C_SVC);
+//        this.cvSVM.setGamma(0.5);
+//        this.cvSVM.setNu(0.5);
+//        this.cvSVM.setC(1);
+//        this.cvSVM.setTermCriteria(criteria);
 	}
 	
 	private Mat getMat(Mat img){
@@ -58,20 +58,30 @@ public class MySVM {
 		return img;
 	}
 	
+	private void showMat(Mat mat){
+		for (int i = 0; i < mat.rows(); i++) {
+        	for (int j = 0; j < mat.cols(); j++) {
+				System.out.printf(mat.get(i, j)[0]+"f, ");
+			}
+        	System.out.println();
+		}
+    	System.out.println();
+	}
+	
 	private Mat getMat(float width, float heigth, float aspect, float hcorner, float normal, float mean, float sum, float trace, float kmeans, float pixelsClaros, float pixelsEscuros, float compInternos){
-		Mat mat = new Mat(new Size(12, 1), CvType.CV_32FC1);
+		Mat mat = new Mat(new Size(12, 1), CvType.CV_32F);
 		mat.put(0, 0, width);
-		mat.put(1, 0, heigth);
-		mat.put(2, 0, aspect);
-		mat.put(3, 0, hcorner);
-		mat.put(4, 0, normal);
-		mat.put(5, 0, mean);
-		mat.put(6, 0, sum);
-		mat.put(7, 0, trace);
-		mat.put(8, 0, kmeans);
-		mat.put(9, 0, pixelsClaros);
-		mat.put(10, 0, pixelsEscuros);
-		mat.put(11, 0, compInternos);
+		mat.put(0, 1, heigth);
+		mat.put(0, 2, aspect);
+		mat.put(0, 3, hcorner);
+		mat.put(0, 4, normal);
+		mat.put(0, 5, mean);
+		mat.put(0, 6, sum);
+		mat.put(0, 7, trace);
+		mat.put(0, 8, kmeans);
+		mat.put(0, 9, pixelsClaros);
+		mat.put(0, 10, pixelsEscuros);
+		mat.put(0, 11, compInternos);
 		return mat;
 	}
 	
@@ -80,7 +90,7 @@ public class MySVM {
 			int maxData = 100;
 	        int count = 0;
 	        float width, heigth, aspect, hcorner, normal, mean, sum, trace, kmeans, pixelsClaros, pixelsEscuros, compInternos;
-	        Mat trainingData = new Mat(new Size(12, maxData*2), CvType.CV_32FC1);
+	        Mat trainingData = new Mat(new Size(0, 0), CvType.CV_32F);
 	        Mat trainingLabels = new Mat(new Size(1, maxData*2), CvType.CV_32SC1);
 	        Mat mat;
 	        Imagem img;
@@ -107,7 +117,7 @@ public class MySVM {
 	        	//System.out.println(img.getNome()+" - 1 - "+width+" - "+heigth+" - "+aspect+" - "+hcorner+" - "+normal+" - "+mean+" - "+sum+" - "+trace+" - "+kmeans+" - "+pixelsClaros+" - "+pixelsEscuros+" - "+compInternos);
 	        		        	
 	        	mat = getMat(width, heigth, aspect, hcorner, normal, mean, sum, trace, kmeans, pixelsClaros, pixelsEscuros, compInternos);
-	        	trainingData.row(count).push_back(mat);
+	        	trainingData.push_back(mat);
 	        	trainingLabels.put(count, 0, 1);
 	        	count++;
 			}
@@ -118,8 +128,8 @@ public class MySVM {
 	        	img = PreProcessamento.paraTonsDeCinza(img);
 	        	mat = img.getMatriz();
 	        		        	
-	        	width = mat.width();
-	        	heigth = mat.height();
+	        	width = Float.parseFloat(FileUtil.EMPTY+mat.width());
+	        	heigth = Float.parseFloat(FileUtil.EMPTY+mat.height());
 	        	aspect = width/heigth;
 	        	hcorner = Descritores.getCntHarrisCorner(mat, 128);
 	        	normal = (float) Descritores.getNorm(img);
@@ -133,20 +143,15 @@ public class MySVM {
 	        	//System.out.println(img.getNome()+" - 0 - "+width+" - "+heigth+" - "+aspect+" - "+hcorner+" - "+normal+" - "+mean+" - "+sum+" - "+trace+" - "+kmeans+" - "+pixelsClaros+" - "+pixelsEscuros+" - "+compInternos);
 	        	
 	        	mat = getMat(width, heigth, aspect, hcorner, normal, mean, sum, trace, kmeans, pixelsClaros, pixelsEscuros, compInternos);
-	        	trainingData.row(count).push_back(mat);
+	        	trainingData.push_back(mat);
 	        	trainingLabels.put(count, 0, 0);
 	        	count++;
 			}
 	        
-	        for (int i = 0; i < trainingData.rows(); i++) {
-	        	for (int j = 0; j < trainingData.cols(); j++) {
-					System.out.printf(trainingData.get(i, j)[0]+", ");
-				}
-	        	System.out.println();
-			}
-            	        
+	        showMat(trainingData);
+	                   	        
 	        this.cvSVM.train(trainingData, Ml.ROW_SAMPLE, trainingLabels);	        
-	        ////this.cvSVM.save(new File(TRAIN_XML).getAbsolutePath());	        
+	        this.cvSVM.save(new File(TRAIN_XML).getAbsolutePath());	        
 		}
 	}
 	
@@ -182,20 +187,21 @@ public class MySVM {
 				if(result == 1) {
 					imgOutputs.add(imagem);
 					System.err.println("1: "+imagem.getNome());
-				}else {
-					System.err.println("0: "+imagem.getNome());
 				}
+//				else {
+//					System.err.println("0: "+imagem.getNome());
+//				}
 			}
 			
-//			mat = getMat(64.0f, 22.0f, 2.909091f, 1319.0f, 5917.45f, 147.67897f, 207932.0f, 3109.0f, 4.8876977f, 0.2393466f, 0.10440341f, 2.0f);
-//			result = this.cvSVM.predict(mat);
-//			if(result == 1) {
-//				System.err.println("1: FAKE");
-//			}else {
-//				System.err.println("0: FAKE");
-//			}
+			mat = getMat(64.0f, 22.0f, 2.909090995788574f, 1319.0f, 5917.4501953125f, 147.67897033691406f, 207932.0f, 3109.0f, 4.887697696685791f, 0.23934659361839294f, 0.10440340638160706f, 2.0f);
+			result = this.cvSVM.predict(mat);
+			if(result == 1) {
+				System.err.println("1: FAKE");
+			}else {
+				System.err.println("0: FAKE");
+			}
 			
-	        //this.cvSVM.save(new File(TEST_XML).getAbsolutePath());
+	        this.cvSVM.save(new File(TEST_XML).getAbsolutePath());
 	        return imgOutputs;
 		}else {
 			throw new Exception("SVM não treinada");

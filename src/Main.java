@@ -30,7 +30,8 @@ public class Main {
 	public static void main(String[] args) {
 		Date dateIni = new Date();
 		Date dateTemp;
-		Date dateFim;
+		Date dateFim;		
+		
 		System.out.println("INICIOU AS: "+ dateIni.toString() +"\n");
 		
 		try {
