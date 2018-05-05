@@ -42,6 +42,14 @@ public class MySVM {
 		this.cvSVM.setKernel(SVM.LINEAR);
         this.cvSVM.setType(SVM.C_SVC);
         this.cvSVM.setC(100000);
+        
+        TermCriteria criteria = new TermCriteria(TermCriteria.EPS + TermCriteria.MAX_ITER,100,0.1);
+        this.cvSVM.setKernel(SVM.LINEAR);
+        this.cvSVM.setType(SVM.C_SVC);
+        this.cvSVM.setGamma(0.5);
+        this.cvSVM.setNu(0.5);
+        this.cvSVM.setC(1);
+        this.cvSVM.setTermCriteria(criteria);
 	}
 	
 	private Mat getMat(Mat img){
@@ -51,7 +59,7 @@ public class MySVM {
 	}
 	
 	private Mat getMat(float width, float heigth, float aspect, float hcorner, float normal, float mean, float sum, float trace, float kmeans, float pixelsClaros, float pixelsEscuros, float compInternos){
-		Mat mat = new Mat(new Size(12, 1), CvType.CV_32F);
+		Mat mat = new Mat(new Size(12, 1), CvType.CV_32FC1);
 		mat.put(0, 0, width);
 		mat.put(1, 0, heigth);
 		mat.put(2, 0, aspect);
@@ -72,7 +80,7 @@ public class MySVM {
 			int maxData = 100;
 	        int count = 0;
 	        float width, heigth, aspect, hcorner, normal, mean, sum, trace, kmeans, pixelsClaros, pixelsEscuros, compInternos;
-	        Mat trainingData = new Mat(new Size(12, maxData*2), CvType.CV_32F);
+	        Mat trainingData = new Mat(new Size(12, maxData*2), CvType.CV_32FC1);
 	        Mat trainingLabels = new Mat(new Size(1, maxData*2), CvType.CV_32SC1);
 	        Mat mat;
 	        Imagem img;
@@ -96,7 +104,7 @@ public class MySVM {
 	        	pixelsClaros = Descritores.getQuantidadePixelsClaros(mat, Descritores.LIMIAR_COR);
 	        	pixelsEscuros = Descritores.getQuantidadePixelsEscuros(mat, Descritores.LIMIAR_COR);
 	        	compInternos = Descritores.getQuantidadesComponentesInternos(img);
-	        	System.out.println(img.getNome()+" - 1 - "+width+" - "+heigth+" - "+aspect+" - "+hcorner+" - "+normal+" - "+mean+" - "+sum+" - "+trace+" - "+kmeans+" - "+pixelsClaros+" - "+pixelsEscuros+" - "+compInternos);
+	        	//System.out.println(img.getNome()+" - 1 - "+width+" - "+heigth+" - "+aspect+" - "+hcorner+" - "+normal+" - "+mean+" - "+sum+" - "+trace+" - "+kmeans+" - "+pixelsClaros+" - "+pixelsEscuros+" - "+compInternos);
 	        		        	
 	        	mat = getMat(width, heigth, aspect, hcorner, normal, mean, sum, trace, kmeans, pixelsClaros, pixelsEscuros, compInternos);
 	        	trainingData.row(count).push_back(mat);
@@ -122,16 +130,23 @@ public class MySVM {
 	        	pixelsClaros = Descritores.getQuantidadePixelsClaros(mat, Descritores.LIMIAR_COR);
 	        	pixelsEscuros = Descritores.getQuantidadePixelsEscuros(mat, Descritores.LIMIAR_COR);
 	        	compInternos = Descritores.getQuantidadesComponentesInternos(img);
-	        	System.out.println(img.getNome()+" - 0 - "+width+" - "+heigth+" - "+aspect+" - "+hcorner+" - "+normal+" - "+mean+" - "+sum+" - "+trace+" - "+kmeans+" - "+pixelsClaros+" - "+pixelsEscuros+" - "+compInternos);
+	        	//System.out.println(img.getNome()+" - 0 - "+width+" - "+heigth+" - "+aspect+" - "+hcorner+" - "+normal+" - "+mean+" - "+sum+" - "+trace+" - "+kmeans+" - "+pixelsClaros+" - "+pixelsEscuros+" - "+compInternos);
 	        	
 	        	mat = getMat(width, heigth, aspect, hcorner, normal, mean, sum, trace, kmeans, pixelsClaros, pixelsEscuros, compInternos);
 	        	trainingData.row(count).push_back(mat);
 	        	trainingLabels.put(count, 0, 0);
 	        	count++;
 			}
+	        
+	        for (int i = 0; i < trainingData.rows(); i++) {
+	        	for (int j = 0; j < trainingData.cols(); j++) {
+					System.out.printf(trainingData.get(i, j)[0]+", ");
+				}
+	        	System.out.println();
+			}
             	        
-	        this.cvSVM.train(trainingData, Ml.ROW_SAMPLE, trainingLabels);
-	        this.cvSVM.save(new File(TRAIN_XML).getAbsolutePath());	        
+	        this.cvSVM.train(trainingData, Ml.ROW_SAMPLE, trainingLabels);	        
+	        ////this.cvSVM.save(new File(TRAIN_XML).getAbsolutePath());	        
 		}
 	}
 	
@@ -180,7 +195,7 @@ public class MySVM {
 //				System.err.println("0: FAKE");
 //			}
 			
-	        this.cvSVM.save(new File(TEST_XML).getAbsolutePath());
+	        //this.cvSVM.save(new File(TEST_XML).getAbsolutePath());
 	        return imgOutputs;
 		}else {
 			throw new Exception("SVM não treinada");
@@ -219,7 +234,7 @@ public class MySVM {
             trainingLabels = trainingLabels.rowRange(0, trainingLabels.rows()-1);
             	        
 	        this.cvSVM.train(trainingData, Ml.ROW_SAMPLE, trainingLabels);
-	        this.cvSVM.save(new File(TRAIN_XML).getAbsolutePath());	        
+	        //this.cvSVM.save(new File(TRAIN_XML).getAbsolutePath());	        
 		}
 	}
 	
@@ -239,7 +254,7 @@ public class MySVM {
 					System.out.println("0: "+imagem.getNome());
 				}
 			}
-			this.cvSVM.save(new File(TEST_XML).getAbsolutePath());
+			//this.cvSVM.save(new File(TEST_XML).getAbsolutePath());
 	        return imgOutputs;
 		}else {
 			throw new Exception("SVM não treinada");
