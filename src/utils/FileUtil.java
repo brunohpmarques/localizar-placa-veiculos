@@ -2,6 +2,9 @@ package utils;
 
 import java.io.File;
 import java.io.FileNotFoundException;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -14,7 +17,6 @@ import model.Imagem;
 
 public class FileUtil {
 	private static final List<String> FILE_TYPES;
-	public static final String EMPTY = "";
 	
 	static {
 		FILE_TYPES = new ArrayList<>();
@@ -73,4 +75,17 @@ public class FileUtil {
 		}
 		return listaImagens;
 	}
+	
+	public static void gravarArquivo(String caminho, String conteudo, boolean append) {
+        File arquivo = new File(caminho);
+        try {
+            FileWriter grava = new FileWriter(arquivo, append);
+            PrintWriter escreve = new PrintWriter(grava);
+            escreve.println(conteudo);
+            escreve.close();
+            grava.close();
+        } catch (IOException ex) {
+            ex.printStackTrace();
+        }
+    }
 }

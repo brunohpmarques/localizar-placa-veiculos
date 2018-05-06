@@ -79,12 +79,12 @@ public class Segmentacao {
 		                //////////////////////////////////////////
 		                
 		                //////////////////////////////////////////
-		                // Segmentacao pela conta de densidade de pixels claros e escuros e componentes internos
-		                float count = Descritores.getQuantidadePixelsClaros(cropped, Descritores.LIMIAR_COR);
-		                imgCandidata.setQuantidadePixelsClaros(count);
-		                count = Descritores.getQuantidadePixelsEscuros(cropped, Descritores.LIMIAR_COR);
-		                imgCandidata.setQuantidadePixelsEscuros(count);
-		                imgCandidata.setTrace(Descritores.getQuantidadesComponentesInternos(imgCandidata));
+		                // Segmentacao usada na disciplina de PI pela conta de densidade de pixels claros e escuros e componentes internos
+//		                float count = Descritores.getQuantidadePixelsClaros(cropped, Descritores.LIMIAR_COR);
+//		                imgCandidata.setQuantidadePixelsClaros(count);
+//		                count = Descritores.getQuantidadePixelsEscuros(cropped, Descritores.LIMIAR_COR);
+//		                imgCandidata.setQuantidadePixelsEscuros(count);
+//		                imgCandidata.setTrace(Descritores.getQuantidadesComponentesInternos(imgCandidata));
 		                //////////////////////////////////////////
 		                
 		                imgCandidata.setCaminho(DIRECT_SEGMENTACAO);

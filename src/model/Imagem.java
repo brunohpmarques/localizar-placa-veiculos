@@ -15,9 +15,12 @@ public class Imagem {
 	private double trace;
 	private float quantidadePixelsClaros;
 	private float quantidadePixelsEscuros;
+	private int quantidadeCompInternos;
 	
 	private int[] histograma;
 	private double distancia;
+	
+	public Imagem(){}
 	
 	public Imagem(String nome, int[] histograma){
 		this.nome = nome;

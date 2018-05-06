@@ -4,9 +4,10 @@ import java.util.Date;
 
 import org.opencv.core.Core;
 
-import ia.MyKNN;
 import ia.MySVM;
 import model.Imagem;
+import utils.ArffUtil;
+import utils.ConstantesUtil;
 import utils.FileUtil;
 import utils.Segmentacao;
 
@@ -14,13 +15,11 @@ import utils.Segmentacao;
 // Documentacao http://www.w3ii.com/pt/java_dip/default.html
 // Referencia http://wiki.ifba.edu.br/ads/tiki-download_file.php?fileId=827
 public class Main {
-	
-	private static final String DIRECT_ENTRADA = System.getProperty("user.dir") +"/baseTeste";
-	
+		
 	static{
 		// Carrega OPENCV
 		System.loadLibrary(Core.NATIVE_LIBRARY_NAME);
-		File fe = new File(DIRECT_ENTRADA);
+		File fe = new File(ConstantesUtil.PATH_INPUT);
 		if(!fe.exists()){
 			fe.mkdirs();
 		}		
@@ -39,7 +38,7 @@ public class Main {
 			svm.toTrain();
 			
 			System.out.println("Carregando imagens de entrada."); 
-			ArrayList<Imagem> listaImagensEntrada = FileUtil.getListaImagens(DIRECT_ENTRADA, 0);
+			ArrayList<Imagem> listaImagensEntrada = FileUtil.getListaImagens(ConstantesUtil.PATH_INPUT, 0);
 			dateFim = new Date();
 			dateFim.setTime(dateFim.getTime()-dateIni.getTime());
 			System.out.println(listaImagensEntrada.size() +" imagens de entrada carregadas em "+ (dateFim.getTime()/1000) +" segundos.\n");
@@ -52,12 +51,16 @@ public class Main {
 			ArrayList<Imagem> regioesSelecionadas;
 			int proc = 0;
 			for (Imagem imagem : listaImagensEntrada) {
-				imgTemp = AlgoritmosPreProc.clear(imagem);
+				imgTemp = AlgoritmosPreProc.pcc(imagem);
 				imgTemp.gravar();
 				
 				regioesCandidatas = Segmentacao.getRegioesCandidatas(imagem, imgTemp, 2);
-				regioesSelecionadas = svm.toTest(regioesCandidatas);
+				System.out.println(regioesCandidatas.size()+" regioes candidatas para "+imagem.getNome());
+//				for (Imagem img : regioesCandidatas) {
+//					img.gravar();
+//				}
 				
+				regioesSelecionadas = svm.toTest(regioesCandidatas);
 				for (Imagem img : regioesSelecionadas) {
 					img.gravar();
 				}
@@ -85,9 +88,7 @@ public class Main {
 	
 	public static void main2(String[] args) {
 		try {
-			MyKNN.Extractor.gerarVetorARFF("baseVetor");
-			ArrayList<Imagem> al = MyKNN.Extractor.lerVetorARFF("baseVetor");
-			System.err.println(al.size() +" imagens lidas");
+			ArffUtil.gerarARFF("baseVetor");
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
@@ -102,7 +103,7 @@ public class Main {
 		try{
 			
 			System.out.println("Carregando imagens de entrada."); 
-			ArrayList<Imagem> listaImagensEntrada = FileUtil.getListaImagens(DIRECT_ENTRADA, 0);
+			ArrayList<Imagem> listaImagensEntrada = FileUtil.getListaImagens(ConstantesUtil.PATH_INPUT, 0);
 			dateFim = new Date();
 			dateFim.setTime(dateFim.getTime()-dateIni.getTime());
 			System.out.println(listaImagensEntrada.size() +" imagens de entrada carregadas em "+ (dateFim.getTime()/1000) +" segundos.\n");

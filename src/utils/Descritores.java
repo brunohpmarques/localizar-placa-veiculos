@@ -24,8 +24,6 @@ import org.opencv.imgproc.Imgproc;
 import org.opencv.objdetect.HOGDescriptor;
 
 import model.Imagem;
-import utils.PreProcessamento.Orientacao;
-import utils.PreProcessamento.Sinal;
 
 public class Descritores {
 	public static final double MARGEM_COR = 20;

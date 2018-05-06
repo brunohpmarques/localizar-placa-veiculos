@@ -33,6 +33,7 @@ public class AlgoritmosPreProc {
 		Imagem imgTemp1 = null, imgTemp2 = null;
 				
 		imagem = PreProcessamento.paraTonsDeCinza(imagem);
+		imagem = PreProcessamento.normalizar(imagem);
 		imagem = PreProcessamento.ajustarBrilho(imagem, 0.30, 0.30);
 		imagem = PreProcessamento.filtroMediana(imagem, 5);
 		
@@ -46,6 +47,18 @@ public class AlgoritmosPreProc {
 		imagem = PreProcessamento.morfoErosao(imagem, 3);
 		imagem = PreProcessamento.morfoDilatacaoOrientacao(imagem, Orientacao.HORIZONTAL, 30);
 		imagem = PreProcessamento.morfoDilatacao(imagem, 9);
+		return imagem;
+	}
+	
+	public static Imagem pcc(Imagem imagem){
+		imagem = PreProcessamento.paraTonsDeCinza(imagem);
+		imagem = PreProcessamento.normalizar(imagem);
+				
+		imagem = PreProcessamento.filtroMediana(imagem, 5);
+		imagem = PreProcessamento.filtroNitidez(imagem, 0.1, 1, 1, -75);
+		
+		imagem = PreProcessamento.paraPretoEBrancoLocal(imagem, 21, 25);
+		Core.bitwise_not(imagem.getMatriz(), imagem.getMatriz());
 		return imagem;
 	}
 
