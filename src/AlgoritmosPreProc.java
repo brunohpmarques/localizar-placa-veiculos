@@ -6,26 +6,6 @@ import utils.PreProcessamento.Orientacao;
 
 public class AlgoritmosPreProc {
 	
-	// Ent		Segm	Acer	Erro	NaoEnc
-	// 382	->	382		90		292		0
-	public static Imagem advanced(Imagem imagem){
-		Imagem imgTemp1 = null, imgTemp2 = null;
-				
-		imagem = PreProcessamento.paraTonsDeCinza(imagem);
-		imagem = PreProcessamento.normalizar(imagem);
-		imagem = PreProcessamento.filtroNitidez(imagem, 7, 0.75, -0.5, 0);
-		imagem = PreProcessamento.filtroGaussiano(imagem, 3, -3);
-		imagem = PreProcessamento.normalizar(imagem);
-		imagem = PreProcessamento.filtroAutoCanny(imagem, 0);
-		imgTemp1 = PreProcessamento.morfoFechamentoOrientacao(imagem, Orientacao.HORIZONTAL, 30);
-		imgTemp2 = PreProcessamento.morfoFechamentoOrientacao(imagem, Orientacao.VERTICAL, 30);
-		imagem = PreProcessamento.intersecao(imgTemp1, imgTemp2);
-		imagem = PreProcessamento.morfoErosao(imagem, 3);
-		imagem = PreProcessamento.morfoDilatacaoOrientacao(imagem, Orientacao.HORIZONTAL, 30);
-		imagem = PreProcessamento.morfoDilatacao(imagem, 9);
-		return imagem;
-	}
-	
 	// MELHOR
 	// Ent		Segm	Acer	Erro	NaoEnc
 	// 382	->	365		232		133		17
@@ -37,31 +17,19 @@ public class AlgoritmosPreProc {
 		imagem = PreProcessamento.ajustarBrilho(imagem, 0.30, 0.30);
 		imagem = PreProcessamento.filtroMediana(imagem, 5);
 		
-		imagem = PreProcessamento.paraPretoEBrancoLocal(imagem, 9, 5);//15, 5
+		imagem = PreProcessamento.paraPretoEBrancoLocal(imagem, 9, 5);
 		Core.bitwise_not(imagem.getMatriz(), imagem.getMatriz());
 		
 		imgTemp1 = PreProcessamento.morfoFechamentoOrientacao(imagem, Orientacao.HORIZONTAL, 30);
-		imgTemp2 = PreProcessamento.morfoFechamentoOrientacao(imagem, Orientacao.VERTICAL, 15);
+		imgTemp2 = PreProcessamento.morfoFechamentoOrientacao(imagem, Orientacao.VERTICAL, 30);
 		imagem = PreProcessamento.intersecao(imgTemp1, imgTemp2);
 		
 		imagem = PreProcessamento.morfoErosao(imagem, 3);
-		imagem = PreProcessamento.morfoDilatacaoOrientacao(imagem, Orientacao.HORIZONTAL, 30);
+		imagem = PreProcessamento.morfoDilatacaoOrientacao(imagem, Orientacao.HORIZONTAL, 20);
 		imagem = PreProcessamento.morfoDilatacao(imagem, 9);
 		return imagem;
 	}
 	
-	public static Imagem pcc(Imagem imagem){
-		imagem = PreProcessamento.paraTonsDeCinza(imagem);
-		imagem = PreProcessamento.normalizar(imagem);
-				
-		imagem = PreProcessamento.filtroMediana(imagem, 5);
-		imagem = PreProcessamento.filtroNitidez(imagem, 0.1, 1, 1, -75);
-		
-		imagem = PreProcessamento.paraPretoEBrancoLocal(imagem, 21, 25);
-		Core.bitwise_not(imagem.getMatriz(), imagem.getMatriz());
-		return imagem;
-	}
-
 	public static class Existentes{
 		
 		//http://www.prp.rei.unicamp.br/pibic/congressos/xviicongresso/paineis/059834.pdf

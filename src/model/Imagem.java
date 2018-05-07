@@ -7,6 +7,8 @@ public class Imagem {
 	private String formato;
 	private String caminho;
 	private Mat matriz;
+	private int posX;
+	private int posY;
 	
 	private double aspect;
 	private double norm;
@@ -98,7 +100,23 @@ public class Imagem {
 		this.matriz = matriz;
 		return this;		
 	}
-	
+		
+	public int getPosX() {
+		return posX;
+	}
+
+	public void setPosX(int posX) {
+		this.posX = posX;
+	}
+
+	public int getPosY() {
+		return posY;
+	}
+
+	public void setPosY(int posY) {
+		this.posY = posY;
+	}
+
 	public float getQuantidadePixelsClaros() {
 		return quantidadePixelsClaros;
 	}

@@ -150,20 +150,20 @@ public class Descritores {
 		
 		// OP2
 //		temp = PreProcessamento.paraTonsDeCinza(temp);
-//		temp = PreProcessamento.filtroMediana(temp, 3);
-//		temp = PreProcessamento.filtroNitidez(temp, 3, 1, 101, -101);
-//		temp = PreProcessamento.filtroContraste(temp, 10);
-//		Scalar scalar = Descritores.getMean(temp);
-//		temp = PreProcessamento.paraPretoEBrancoGlobal(temp, scalar.val[0]);
-//		temp = PreProcessamento.filtroAutoCanny(temp, 3);
+		temp = PreProcessamento.filtroMediana(temp, 3);
+		temp = PreProcessamento.filtroNitidez(temp, 3, 1, 101, -101);
+		temp = PreProcessamento.filtroContraste(temp, 10);
+		Scalar scalar = Descritores.getMean(temp);
+		temp = PreProcessamento.paraPretoEBrancoGlobal(temp, scalar.val[0]);
+		temp = PreProcessamento.filtroAutoCanny(temp, 3);
 		
 		// OP3
 //		temp = PreProcessamento.paraTonsDeCinza(temp);
-		temp = PreProcessamento.filtroMediana(temp, 3);
-		temp = PreProcessamento.filtroAutoCanny(temp, 3);
+//		temp = PreProcessamento.filtroMediana(temp, 3);
+//		temp = PreProcessamento.filtroAutoCanny(temp, 3);
 		
-		temp.setCaminho(DIRECT_DESCRITORES);
-		temp.gravar();
+//		temp.setCaminho(DIRECT_DESCRITORES);
+//		temp.gravar();
 				
 		List<MatOfPoint> contours = new ArrayList<MatOfPoint>();
 	    Mat hierarchy = new Mat();

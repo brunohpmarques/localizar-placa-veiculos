@@ -7,18 +7,19 @@ import org.opencv.core.CvType;
 import org.opencv.core.Mat;
 import org.opencv.core.MatOfPoint;
 import org.opencv.core.MatOfPoint2f;
+import org.opencv.core.Point;
 import org.opencv.core.Rect;
+import org.opencv.core.Scalar;
 import org.opencv.imgproc.Imgproc;
 
 import model.Imagem;
+import utils.PreProcessamento.Orientacao;
 
 //outro metodo para segmentacao: https://repositorio.ufba.br/ri/bitstream/ri/20966/1/mono_tiagoaraujo_bsi_2016.1%5BLAPV%5D.pdf	
 public class Segmentacao {
 
-	private static final String DIRECT_SEGMENTACAO = System.getProperty("user.dir") +"/resultados/segmentacao";
-
 	static{
-		File fs = new File(DIRECT_SEGMENTACAO);		
+		File fs = new File(ConstantesUtil.PATH_SEGMENTACAO);		
 		if(!fs.exists()){
 			fs.mkdirs();
 		}		
@@ -59,7 +60,9 @@ public class Segmentacao {
 //		                imagemOriginal.setNome(imagemOriginal.getNome()+"_DRAW");
 //		                imagemOriginal.gravar();
 		                
-		                Imagem imgCandidata = new Imagem(imagemOriginal.getNome() +"_cand_"+i, imagemOriginal.getFormato(), DIRECT_SEGMENTACAO, cropped);
+		                Imagem imgCandidata = new Imagem(imagemOriginal.getNome() +"_cand_"+i, imagemOriginal.getFormato(), ConstantesUtil.PATH_SEGMENTACAO, cropped);
+		                imgCandidata.setPosX(roi.x);
+		                imgCandidata.setPosY(roi.y);
 		                
 		                //////////////////////////////////////////
 		                // Segmentacao pelo KNN com vetor de caracteristicas estatisticas
@@ -87,13 +90,45 @@ public class Segmentacao {
 //		                imgCandidata.setTrace(Descritores.getQuantidadesComponentesInternos(imgCandidata));
 		                //////////////////////////////////////////
 		                
-		                imgCandidata.setCaminho(DIRECT_SEGMENTACAO);
+		                imgCandidata.setCaminho(ConstantesUtil.PATH_SEGMENTACAO);
 		                regioesCandidatas.add(imgCandidata);
 	            	}	
 	            }
 	        }   
 	    }
 	    return regioesCandidatas;
+	}
+	
+	public static Imagem pintar(Imagem imagem, ArrayList<Imagem> regioesSelecionadas) {
+		for (Imagem img : regioesSelecionadas) {
+			imagem.setCaminho(ConstantesUtil.PATH_SEGMENTACAO);
+	        Imgproc.rectangle(imagem.getMatriz(), new Point(img.getPosX(), img.getPosY()), new Point(img.getPosX() + img.getMatriz().width(), img.getPosY() + img.getMatriz().height()), new Scalar(0, 255, 0), 2);
+		}
+		return imagem;
+	}
+	
+	public static Imagem redimensionar(Imagem imagem){  
+		Mat mat = imagem.getMatriz();
+		int max = 800;
+		int diff = 50;
+		int width = mat.width();
+		int height = mat.height();
+		double sc;
+		if(max - width > diff) {
+			if(width > height) {
+				sc = max / width;
+				width = max;
+				height = (int) (height * sc);
+			}else {
+				sc = max / height;
+				height = max;
+				width = (int) (width * sc);
+			}
+			imagem = PreProcessamento.redimensionar(imagem, width, height);
+		
+		}
+		imagem.setCaminho(ConstantesUtil.PATH_SEGMENTACAO);
+		return imagem;
 	}
 	
 	// escolher candidata

@@ -6,14 +6,16 @@ import java.util.ArrayList;
 
 import org.opencv.core.CvType;
 import org.opencv.core.Mat;
+import org.opencv.core.MatOfFloat;
+import org.opencv.core.MatOfPoint;
 import org.opencv.core.Size;
 import org.opencv.core.TermCriteria;
 import org.opencv.imgproc.Imgproc;
 import org.opencv.ml.Ml;
 import org.opencv.ml.SVM;
+import org.opencv.objdetect.HOGDescriptor;
 
 import model.Imagem;
-import utils.ArffUtil;
 import utils.ConstantesUtil;
 import utils.Descritores;
 import utils.FileUtil;
@@ -37,11 +39,8 @@ public class MySVM {
 	
 	public MySVM () {
 		this.cvSVM = SVM.create();
-		this.cvSVM.setKernel(SVM.POLY);
+		this.cvSVM.setKernel(SVM.LINEAR);
         this.cvSVM.setType(SVM.C_SVC);
-        this.cvSVM.setC(250007);
-        this.cvSVM.setDegree(1);
-        this.cvSVM.setTermCriteria(new TermCriteria(TermCriteria.MAX_ITER, 1000, 1));
 	}
 	
 	private Mat getMat(Mat img){
@@ -92,6 +91,7 @@ public class MySVM {
 	        for (int i = 0; i < imagens.size(); i++) {
 	        	img = imagens.get(i);
 	        	img = PreProcessamento.paraTonsDeCinza(img);
+//	        	img = Segmentacao.redimensionar(img);
 	        	mat = img.getMatriz();
 	        		        	
 	        	width = mat.width();
@@ -118,6 +118,7 @@ public class MySVM {
 	        for (int i = 0; i < imagens.size(); i++) {
 	        	img = imagens.get(i);
 	        	img = PreProcessamento.paraTonsDeCinza(img);
+//	        	img = Segmentacao.redimensionar(img);
 	        	mat = img.getMatriz();
 	        		        	
 	        	width = Float.parseFloat(ConstantesUtil.EMPTY+mat.width());
@@ -155,8 +156,8 @@ public class MySVM {
 	        Mat mat;
 			
 			for (Imagem imagem : imgInputs) {
+//				imagem = Segmentacao.redimensionar(imagem);
 				mat = imagem.getMatriz().clone();
-				mat.put(0, 0);
 				Imgproc.cvtColor(imagem.getMatriz(), mat, Imgproc.COLOR_RGB2GRAY);
 	        	
 	        	width = mat.width();
@@ -183,7 +184,7 @@ public class MySVM {
 //					System.err.println("0: "+imagem.getNome());
 //				}
 			}
-			
+	        System.err.println(imgOutputs.size()+" podem ser placa");
 	        this.cvSVM.save(new File(ConstantesUtil.PATH_TEST_XML).getAbsolutePath());
 	        return imgOutputs;
 		}else {
@@ -224,7 +225,7 @@ public class MySVM {
 	        System.out.println(trainingData.size());
             	        
 	        this.cvSVM.train(trainingData, Ml.ROW_SAMPLE, trainingLabels);
-	        //this.cvSVM.save(new File(ConstantesUtil.PATH_TRAIN_XML).getAbsolutePath());	        
+	        this.cvSVM.save(new File(ConstantesUtil.PATH_TRAIN_XML).getAbsolutePath());	        
 		}
 	}
 	
@@ -236,6 +237,7 @@ public class MySVM {
 			
 			for (Imagem imagem : imgInputs) {
 				img = Descritores.getMatHistograma(imagem);
+	        	img = imagem.getMatriz().clone();
 				img = getMat(img);
 				result = this.cvSVM.predict(img);
 				if(result == 1) {
@@ -246,7 +248,104 @@ public class MySVM {
 //					System.err.println("0: "+imagem.getNome());
 //				}
 			}
-			//this.cvSVM.save(new File(ConstantesUtil.PATH_TEST_XML).getAbsolutePath());
+	        System.err.println(imgOutputs.size()+" podem ser placa");
+			this.cvSVM.save(new File(ConstantesUtil.PATH_TEST_XML).getAbsolutePath());
+	        return imgOutputs;
+		}else {
+			throw new Exception("SVM não treinada");
+		}
+	}
+	
+	/**@see http://answers.opencv.org/question/128170/training-svm-using-hog-features-using-java/
+	 * @see https://stackoverflow.com/questions/38233753/android-opencv-why-hog-descriptors-are-always-zero*/
+	public void toTrainHOG() throws FileNotFoundException {
+		if(!this.cvSVM.isTrained()) {
+			int maxData = 350;
+			Mat trainingData = new Mat();
+	        Mat trainingLabels = new Mat();
+	        Mat img = null;
+	        Size sz = new Size(384,192);
+	        Size szone = new Size(1,1);
+	        Size szzer = new Size(0,0);
+	        ArrayList<Imagem> imagens;
+	        
+	        imagens = FileUtil.getListaImagens(ConstantesUtil.PATH_DATA_POSITIVE, maxData);
+	        for (int i = 0; i < imagens.size(); i++) {
+	        	img = imagens.get(i).getMatriz();
+		        Imgproc.resize(img, img, sz);
+		        Imgproc.cvtColor(img, img, Imgproc.COLOR_RGB2GRAY);
+		        trainingData.push_back(img);
+		        trainingLabels.push_back(Mat.ones(szone, CvType.CV_32SC1));
+	        }
+	        
+	        imagens = FileUtil.getListaImagens(ConstantesUtil.PATH_DATA_NEGATIVE, maxData);
+	        for (int i = 0; i < imagens.size(); i++) {
+	        	img = imagens.get(i).getMatriz();
+		        Imgproc.resize(img, img, sz);
+		        Imgproc.cvtColor(img, img, Imgproc.COLOR_RGB2GRAY);
+		        trainingData.push_back(img);
+		        trainingLabels.push_back(Mat.zeros(szone, CvType.CV_32SC1));
+	        }  
+	        
+	        Size size = new Size(sz.width, sz.height);
+	        Size block_size = new Size(size.width / 4, size.height / 4);
+	        Size block_stride = new Size(size.width / 8, size.height / 8);
+	        Size cell_size = block_stride;
+	        int num_bins = 9;
+	        HOGDescriptor hog = new HOGDescriptor(size, block_size, block_stride, cell_size, num_bins);
+	        Mat inputHOG;
+	        Mat gradients = new Mat();
+	        MatOfPoint locations = new MatOfPoint();
+	        MatOfFloat descriptors = new MatOfFloat();
+	        
+	        for (int i = 0; i < trainingData.rows(); i+=sz.height){
+	            inputHOG = new Mat();
+	            for (int j = 0; j < sz.height; j++) {
+	            	inputHOG.push_back(trainingData.row(j));
+				}
+	            hog.compute(inputHOG, descriptors, szzer, szzer, locations);
+	            img = descriptors.reshape(descriptors.cols(), 1);
+	            gradients.push_back(img.clone());
+	        }
+	        
+	        trainingData.convertTo(trainingData, CvType.CV_32FC1);
+	        this.cvSVM.trainAuto(gradients, Ml.ROW_SAMPLE, trainingLabels);
+	        this.cvSVM.save(new File(ConstantesUtil.PATH_TRAIN_XML).getAbsolutePath());
+		}
+	}
+
+	public ArrayList<Imagem> toTestHOG(ArrayList<Imagem> imagens) throws Exception {
+		if(this.cvSVM.isTrained()) {
+			Size sz = new Size(384,192);
+	        Size szzer = new Size(0,0);
+	        Mat img = null;
+	        double clazz;
+	        Imagem imagem;
+	        ArrayList<Imagem> imgOutputs = new ArrayList<>();
+	        Size size = new Size(sz.width, sz.height);
+	        Size block_size = new Size(size.width / 4, size.height / 4);
+	        Size block_stride = new Size(size.width / 8, size.height / 8);
+	        Size cell_size = block_stride;
+	        int num_bins = 9;
+	        HOGDescriptor hog = new HOGDescriptor(size, block_size, block_stride, cell_size, num_bins);
+	        MatOfPoint locations = new MatOfPoint();
+	        MatOfFloat descriptors = new MatOfFloat();
+	        
+	        for (int i = 0; i < imagens.size(); i++) {
+	        	imagem = imagens.get(i);
+	        	img = imagem.getMatriz().clone();
+		        Imgproc.resize(img, img, sz);
+		        Imgproc.cvtColor(img, img, Imgproc.COLOR_RGB2GRAY);
+		        hog.compute(img, descriptors, szzer, szzer, locations);
+		        img = descriptors.reshape(descriptors.cols(), 1);
+		        
+		        clazz = this.cvSVM.predict(img);
+		        if(clazz == 1) {
+		        	imgOutputs.add(imagem);
+		        }
+	        }
+	        System.err.println(imgOutputs.size()+" podem ser placa");
+	        this.cvSVM.save(new File(ConstantesUtil.PATH_TEST_XML).getAbsolutePath());
 	        return imgOutputs;
 		}else {
 			throw new Exception("SVM não treinada");

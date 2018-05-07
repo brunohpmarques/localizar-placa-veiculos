@@ -35,7 +35,7 @@ public class Main {
 		
 		try {
 			MySVM svm = new MySVM();
-			svm.toTrain();
+			svm.toTrainHOG();
 			
 			System.out.println("Carregando imagens de entrada."); 
 			ArrayList<Imagem> listaImagensEntrada = FileUtil.getListaImagens(ConstantesUtil.PATH_INPUT, 0);
@@ -51,7 +51,8 @@ public class Main {
 			ArrayList<Imagem> regioesSelecionadas;
 			int proc = 0;
 			for (Imagem imagem : listaImagensEntrada) {
-				imgTemp = AlgoritmosPreProc.pcc(imagem);
+				imagem = Segmentacao.redimensionar(imagem);
+				imgTemp = AlgoritmosPreProc.clear(imagem);
 				imgTemp.gravar();
 				
 				regioesCandidatas = Segmentacao.getRegioesCandidatas(imagem, imgTemp, 2);
@@ -60,10 +61,13 @@ public class Main {
 //					img.gravar();
 //				}
 				
-				regioesSelecionadas = svm.toTest(regioesCandidatas);
+				regioesSelecionadas = svm.toTestHOG(regioesCandidatas);
 				for (Imagem img : regioesSelecionadas) {
 					img.gravar();
 				}
+				
+				imagem = Segmentacao.pintar(imagem, regioesSelecionadas);
+				imagem.gravar();
 				
 				if(++proc % 50 == 0){
 					System.out.println("Imagens processadas: "+proc);
@@ -88,7 +92,7 @@ public class Main {
 	
 	public static void main2(String[] args) {
 		try {
-			ArffUtil.gerarARFF("baseVetor");
+			ArffUtil.gerarHogARFF("baseVetorHog");
 		} catch (Exception e) {
 			e.printStackTrace();
 		}

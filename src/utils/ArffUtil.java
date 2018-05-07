@@ -10,6 +10,11 @@ import java.util.Collections;
 import java.util.Date;
 
 import org.opencv.core.Mat;
+import org.opencv.core.MatOfFloat;
+import org.opencv.core.MatOfPoint;
+import org.opencv.core.Size;
+import org.opencv.imgproc.Imgproc;
+import org.opencv.objdetect.HOGDescriptor;
 
 import model.Imagem;
 
@@ -85,6 +90,82 @@ public class ArffUtil {
 			temp += fname.charAt(0)+ConstantesUtil.ls;
 			texto += temp;
 		}
+		
+		FileUtil.gravarArquivo(ConstantesUtil.PATH_DATA+nomeArquivo+".arff", texto, false);
+		
+		dateFim = new Date();
+		System.out.println("TERMINOU DE GRAVAR A BASE AS: "+ dateFim.toString());
+		dateFim.setTime(dateFim.getTime()-dateIni.getTime());
+		System.out.println("DURACAO: "+ dateFim.getTime()/1000 +" SEGUNDOS\n");
+	}
+	
+	public static void gerarHogARFF(String nomeArquivo) throws FileNotFoundException{
+		Date dateIni = new Date();
+		Date dateFim;
+		System.out.println("GERANDO BASE ARFF AS: "+ dateIni.toString());
+		
+		int max = 300;
+		String texto = 
+				  "% DETECCAO DE PLACAS VEICULARES"+ConstantesUtil.ls
+				+ "% BRUNO MARQUES"+ConstantesUtil.ls
+				+ "% DANNY QUEIROZ"+ConstantesUtil.ls
+				+ "% PROCESSAMENTO DE IMAGENS 2016.2 - UFRPE"+ConstantesUtil.ls+ConstantesUtil.ls
+				+ "@RELATION deteccaoDePlacasVeiculares"+ConstantesUtil.ls+ConstantesUtil.ls;
+
+		for (int i = 0; i < 1764; i++) {
+			texto += "@ATTRIBUTE hog-"+i+" NUMERIC"+ConstantesUtil.ls;
+		}
+		texto += "@ATTRIBUTE nome STRING"+ConstantesUtil.ls;
+		texto += "@ATTRIBUTE class {0,1}"+ConstantesUtil.ls;
+		texto += ConstantesUtil.ls+"@DATA"+ConstantesUtil.ls;
+		
+		Mat mat;
+		String temp = ConstantesUtil.EMPTY;
+		String fname;
+		ArrayList<Imagem> imagensData = new ArrayList<>();
+		
+		ArrayList<Imagem> listaImagensP = FileUtil.getListaImagens(ConstantesUtil.PATH_DATA_POSITIVE, max);
+		for (Imagem imagem : listaImagensP) {
+			imagem.setNome("1_"+imagem.getNome());
+		}
+		imagensData.addAll(listaImagensP);
+		
+		ArrayList<Imagem> listaImagensN = FileUtil.getListaImagens(ConstantesUtil.PATH_DATA_POSITIVE, max);
+		for (Imagem imagem : listaImagensN) {
+			imagem.setNome("0_"+imagem.getNome());
+		}
+		imagensData.addAll(listaImagensN);
+		System.out.println(imagensData.size());
+		
+		Collections.shuffle(imagensData);
+		
+		Size sz = new Size(384,192);
+        Size szzer = new Size(0,0);
+        Size size = new Size(sz.width, sz.height);
+        Size block_size = new Size(size.width / 4, size.height / 4);
+        Size block_stride = new Size(size.width / 8, size.height / 8);
+        Size cell_size = block_stride;
+        int num_bins = 9;
+        HOGDescriptor hog = new HOGDescriptor(size, block_size, block_stride, cell_size, num_bins);
+        MatOfPoint locations = new MatOfPoint();
+        MatOfFloat descriptors = new MatOfFloat();
+        
+        for (Imagem imagem : imagensData) {
+        	mat = imagem.getMatriz();
+        	fname = imagem.getNome();
+	        Imgproc.resize(mat, mat, sz);
+	        Imgproc.cvtColor(mat, mat, Imgproc.COLOR_RGB2GRAY);
+	        hog.compute(mat, descriptors, szzer, szzer, locations);
+	        mat = descriptors.reshape(descriptors.cols(), 1);
+	        temp = ConstantesUtil.EMPTY;
+	        //System.out.println(mat.width());
+	        for (int i = 0; i < mat.width(); i++) {
+	        	temp += mat.get(0, i)[0]+ConstantesUtil.COMMA;
+			}
+	        temp += fname.substring(2, fname.length())+ConstantesUtil.COMMA;
+			temp += fname.charAt(0)+ConstantesUtil.ls;
+	        texto += temp;
+        }
 		
 		FileUtil.gravarArquivo(ConstantesUtil.PATH_DATA+nomeArquivo+".arff", texto, false);
 		
