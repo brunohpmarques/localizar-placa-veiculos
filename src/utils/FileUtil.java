@@ -88,4 +88,25 @@ public class FileUtil {
             ex.printStackTrace();
         }
     }
+	
+	//renomearImagens("D:\\Documentos\\python\\DLLPD\\base\\placas\\", "placas-", ".jpg");
+    public static void renomearImagens(String diretorio, String prefixo, String formato) throws FileNotFoundException{
+		File arquivos = new File(diretorio);
+		
+		if(!arquivos.isDirectory()){
+			throw new FileNotFoundException(diretorio);
+		}
+		File[] arrayArquivos = arquivos.listFiles();
+		
+		if(arrayArquivos == null){
+			throw new FileNotFoundException(diretorio);
+		}
+        int count = 1;
+		for (File arquivo : arrayArquivos) {
+			if(arquivo.isFile() && arquivo.canRead()){
+				arquivo.renameTo(new File(diretorio+prefixo+count+formato));
+				count++;
+			}
+		}
+	}
 }
